@@ -10,6 +10,7 @@ import {
   Settings,
   Sparkles,
   Compass,
+  Image,
   PanelLeftClose,
   PanelLeftOpen,
   User,
@@ -25,6 +26,7 @@ type Props = {
   personaId: string | null;
   userProfile: UserProfile | null;
   onOpenDiscover: () => void;
+  onOpenGenerate: () => void;
   onSelectPersona: (id: string) => void;
   onNewPersona: () => void;
   onEditPersona: (persona: Persona) => void;
@@ -212,6 +214,16 @@ export default function Sidebar(p: Props) {
         >
           <Compass size={17} strokeWidth={2} />
           {!collapsed && "Discover"}
+        </button>
+        <button
+          onClick={p.onOpenGenerate}
+          title="Generate"
+          className={`flex items-center gap-3 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200/70 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 ${
+            collapsed ? "justify-center w-10 h-10" : "w-full px-2.5 py-2"
+          }`}
+        >
+          <Image size={17} strokeWidth={2} />
+          {!collapsed && "Generate"}
         </button>
         <button
           onClick={p.onNewPersona}

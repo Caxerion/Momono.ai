@@ -6,6 +6,7 @@ import CreateCharacter from "./components/CreateCharacter";
 import CharacterProfile from "./components/CharacterProfile";
 import CharacterSidebar from "./components/CharacterSidebar";
 import Discover from "./components/Discover";
+import Generate from "./components/Generate";
 import Settings from "./components/Settings";
 import UserProfilePage from "./components/UserProfile";
 import Login from "./components/Login";
@@ -551,6 +552,7 @@ export default function App() {
         personaId={route.path === "chat" ? route.personaId : null}
         userProfile={userProfile}
         onOpenDiscover={() => navigate({ path: "discover" })}
+        onOpenGenerate={() => navigate({ path: "generate" })}
         onSelectPersona={handleSelectPersona}
         onNewPersona={() => { setEditingPersona(null); navigate({ path: "create" }); }}
         onEditPersona={(p) => { setEditingPersona(p); navigate({ path: "edit", personaId: p.id }); }}
@@ -627,6 +629,8 @@ export default function App() {
             onToggleFavorite={handleToggleFavorite}
             onViewUser={handleViewUser}
           />
+        ) : route.path === "generate" ? (
+          <Generate token={token} />
         ) : route.path === "chat" && currentPersona ? (
           <div className="flex-1 flex min-h-0">
             <div className="flex-1 flex flex-col min-h-0 min-w-0">

@@ -2,14 +2,21 @@ import hashlib
 import os
 import uuid
 from datetime import datetime, timezone
+from pathlib import Path
 
 from db import connect, init_db
 from fastapi import FastAPI, File, Request, UploadFile
 from fastapi.responses import StreamingResponse
+from fastapi.staticfiles import StaticFiles
+from generator import generate, MODEL_MAP
 from llm import load_config, stream_chat
 
 app = FastAPI()
 cfg = load_config()
+
+generated_dir = Path(__file__).parent / "generated"
+generated_dir.mkdir(exist_ok=True)
+app.mount("/generated", StaticFiles(directory=generated_dir), name="generated")
 
 
 def current_user(req: Request) -> str:
@@ -572,3 +579,42 @@ async def report_user(uid: str, req: Request):
         )
         conn.commit()
     return {"ok": True}
+
+
+@app.get("/api/generate/models")
+def list_generate_models():
+    """Daftar model yang tersedia untuk generate gambar/video."""
+    return {
+        name: {
+            "type": kind,
+            "label": {
+                "dalle3": "DALL-E 3",
+                "sdxl": "Stable Diffusion XL",
+                "hf-sdxl": "Flux (Free)",
+                "svd": "Stable Video Diffusion",
+            }.get(name, name),
+        }
+        for name, (kind, _) in MODEL_MAP.items()
+    }
+
+
+@app.post("/api/generate")
+async def api_generate(req: Request):
+    body = await req.json()
+    prompt = (body.get("prompt") or "").strip()
+    if not prompt:
+        return {"error": "prompt is required"}
+
+    model = body.get("model") or "dalle3"
+    try:
+        result = await generate(model=model, prompt=prompt)
+    except ValueError as exc:
+        return {"error": str(exc)}
+    except Exception:
+        return {"error": "generation failed, please try again"}
+
+    return {
+        "url": f"/generated/{result['filename']}",
+        "type": result["type"],
+        "model": model,
+    }
