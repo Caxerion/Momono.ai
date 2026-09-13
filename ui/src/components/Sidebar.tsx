@@ -15,6 +15,7 @@ import {
   PanelLeftOpen,
   User,
   LogOut,
+  Shield,
 } from "lucide-react";
 import Avatar from "./Avatar";
 import type { Conversation, Persona, UserProfile } from "../types";
@@ -25,8 +26,10 @@ type Props = {
   createdPersonas: Persona[];
   personaId: string | null;
   userProfile: UserProfile | null;
+  isAdmin: boolean;
   onOpenDiscover: () => void;
   onOpenGenerate: () => void;
+  onOpenAdmin: () => void;
   onSelectPersona: (id: string) => void;
   onNewPersona: () => void;
   onEditPersona: (persona: Persona) => void;
@@ -225,6 +228,18 @@ export default function Sidebar(p: Props) {
           <Image size={17} strokeWidth={2} />
           {!collapsed && "Generate"}
         </button>
+        {p.isAdmin && (
+          <button
+            onClick={p.onOpenAdmin}
+            title="Admin Panel"
+            className={`flex items-center gap-3 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200/70 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 ${
+              collapsed ? "justify-center w-10 h-10" : "w-full px-2.5 py-2"
+            }`}
+          >
+            <Shield size={17} strokeWidth={2} />
+            {!collapsed && "Admin Panel"}
+          </button>
+        )}
         <button
           onClick={p.onNewPersona}
           title="Create Character"

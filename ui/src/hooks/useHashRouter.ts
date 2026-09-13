@@ -10,7 +10,8 @@ export type Route =
   | { path: "user"; userId: string }
   | { path: "create" }
   | { path: "edit"; personaId: string }
-  | { path: "settings" };
+  | { path: "settings" }
+  | { path: "admin" };
 
 function parseHash(): Route {
   const hash = window.location.hash.replace(/^#\/?/, "");
@@ -25,6 +26,7 @@ function parseHash(): Route {
   if (segs[0] === "me") return { path: "me" };
   if (segs[0] === "create") return { path: "create" };
   if (segs[0] === "settings") return { path: "settings" };
+  if (segs[0] === "admin") return { path: "admin" };
   return { path: "home" };
 }
 
@@ -52,6 +54,7 @@ export function useHashRouter() {
       case "create": hash = "#/create"; break;
       case "edit": hash = `#/edit/${to.personaId}`; break;
       case "settings": hash = "#/settings"; break;
+      case "admin": hash = "#/admin"; break;
     }
     if (window.location.hash !== hash) {
       window.location.hash = hash;

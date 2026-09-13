@@ -8,6 +8,8 @@ import CharacterSidebar from "./components/CharacterSidebar";
 import Discover from "./components/Discover";
 import Generate from "./components/Generate";
 import Settings from "./components/Settings";
+import Admin from "./components/Admin";
+import AdminSidebar, { type AdminTab } from "./components/AdminSidebar";
 import UserProfilePage from "./components/UserProfile";
 import Login from "./components/Login";
 import WelcomeModal from "./components/WelcomeModal";
@@ -56,6 +58,8 @@ export default function App() {
   const [viewUserPersonas, setViewUserPersonas] = useState<Persona[]>([]);
   const [viewUserFavorites, setViewUserFavorites] = useState<Persona[]>([]);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [adminTab, setAdminTab] = useState<AdminTab>("dashboard");
+  const [adminCollapsed, setAdminCollapsed] = useState(false);
 
   const selectingRef = useRef<string | null>(null);
   const triedRef = useRef<string | null>(null);
@@ -230,6 +234,12 @@ export default function App() {
       loadFavorites();
     }
   }, [route, token]);
+
+  useEffect(() => {
+    if (route.path === "admin" && !userProfile?.is_admin) {
+      navigate({ path: "home" });
+    }
+  }, [route, userProfile, navigate]);
 
   async function handleToggleFavorite(persona: Persona, favorite: boolean) {
     const r = await getJSON(`/api/personas/${persona.id}/favorite`, {
@@ -545,14 +555,27 @@ export default function App() {
 
   return (
     <div className={`${dark ? "dark" : ""} flex h-screen overflow-hidden`}>
-      <Sidebar
+      {route.path === "admin" && userProfile?.is_admin ? (
+        <AdminSidebar
+          collapsed={adminCollapsed}
+          tab={adminTab}
+          userProfile={userProfile}
+          onToggleCollapse={() => setAdminCollapsed((x) => !x)}
+          onSelectTab={setAdminTab}
+          onBackToUser={() => navigate({ path: "home" })}
+          onLogout={handleLogout}
+        />
+      ) : (
+        <Sidebar
         conversations={conversations}
         personas={sidebarPersonas}
         createdPersonas={personas}
         personaId={route.path === "chat" ? route.personaId : null}
         userProfile={userProfile}
+        isAdmin={userProfile?.is_admin ?? false}
         onOpenDiscover={() => navigate({ path: "discover" })}
         onOpenGenerate={() => navigate({ path: "generate" })}
+        onOpenAdmin={() => navigate({ path: "admin" })}
         onSelectPersona={handleSelectPersona}
         onNewPersona={() => { setEditingPersona(null); navigate({ path: "create" }); }}
         onEditPersona={(p) => { setEditingPersona(p); navigate({ path: "edit", personaId: p.id }); }}
@@ -561,6 +584,7 @@ export default function App() {
         onOpenSettings={() => setSettingsOpen(true)}
         onLogout={handleLogout}
       />
+      )}
       <div className="flex-1 flex flex-col relative min-h-0">
         {route.path === "create" || route.path === "edit" ? (
           <CreateCharacter
@@ -631,6 +655,14 @@ export default function App() {
           />
         ) : route.path === "generate" ? (
           <Generate token={token} />
+        ) : route.path === "admin" && userProfile?.is_admin ? (
+          <Admin
+            token={token}
+            tab={adminTab}
+            onChangeTab={setAdminTab}
+            onBack={() => navigate({ path: "home" })}
+            onViewUser={handleViewUser}
+          />
         ) : route.path === "chat" && currentPersona ? (
           <div className="flex-1 flex min-h-0">
             <div className="flex-1 flex flex-col min-h-0 min-w-0">

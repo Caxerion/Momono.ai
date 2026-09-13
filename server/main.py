@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import httpx
+from admin import router as admin_router
 from db import connect, init_db
 from fastapi import FastAPI, File, Request, UploadFile
 from fastapi.responses import StreamingResponse
@@ -18,6 +19,8 @@ logger = logging.getLogger("momono")
 
 app = FastAPI()
 cfg = load_config()
+
+app.include_router(admin_router)
 
 generated_dir = Path(__file__).parent / "generated"
 generated_dir.mkdir(exist_ok=True)

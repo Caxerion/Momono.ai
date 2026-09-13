@@ -19,6 +19,12 @@ func RequireAuth(next http.Handler) http.Handler {
 			return
 		}
 		r.Header.Set("X-User-Id", fmt.Sprintf("%d", userID))
+		// Header ini khusus backend: selalu dihapus dulu lalu diisi ulang
+		// kalau user benar-benar admin, biar nggak bisa dipalsukan client.
+		r.Header.Del("X-User-Admin")
+		if IsAdmin(userID) {
+			r.Header.Set("X-User-Admin", "1")
+		}
 		next.ServeHTTP(w, r)
 	})
 }

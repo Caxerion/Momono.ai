@@ -13,7 +13,32 @@ import (
 
 var db *sql.DB
 
+// adminUsernames menyimpan daftar username yang dianggap admin.
+// Diisi dari env MOMONO_ADMINS (dipisah koma) lewat SetAdmins().
+var adminUsernames = map[string]bool{}
+
 const sessionDuration = 7 * 24 * time.Hour // 7 hari
+
+// SetAdmins menerima daftar username admin yang dipisah koma.
+func SetAdmins(raw string) {
+	adminUsernames = map[string]bool{}
+	for _, u := range strings.Split(raw, ",") {
+		u = strings.TrimSpace(u)
+		if u != "" {
+			adminUsernames[u] = true
+		}
+	}
+}
+
+// IsAdmin mengembalikan true jika user dengan id tsb ada di daftar admin.
+func IsAdmin(userID int64) bool {
+	var username string
+	err := db.QueryRow("SELECT username FROM users WHERE id=?", userID).Scan(&username)
+	if err != nil {
+		return false
+	}
+	return adminUsernames[username]
+}
 
 func Init(path string) error {
 	d, err := sql.Open("sqlite", path)

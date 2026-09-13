@@ -150,7 +150,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{
+	json.NewEncoder(w).Encode(map[string]any{
 		"id":           fmt.Sprintf("%d", userID),
 		"username":     username,
 		"email":        email,
@@ -158,6 +158,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		"about_me":     aboutMe,
 		"avatar_url":   avatarUrl,
 		"gender":       gender,
+		"is_admin":     IsAdmin(userID),
 	})
 }
 

@@ -33,4 +33,5 @@ export type UserProfile = {
   about_me: string;
   avatar_url?: string | null;
   gender?: string;
+  is_admin?: boolean;
 };

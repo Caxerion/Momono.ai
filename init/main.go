@@ -56,6 +56,8 @@ func run() {
 		log.Fatal("Gagal inisialisasi auth.db: ", err)
 	}
 
+	auth.SetAdmins(os.Getenv("MOMONO_ADMINS"))
+
 	auth.InitGitHubOAuth()
 
 	if _, err := exec.LookPath("python"); err != nil {
