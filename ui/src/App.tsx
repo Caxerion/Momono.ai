@@ -10,6 +10,7 @@ import Generate from "./components/Generate";
 import Settings from "./components/Settings";
 import Admin from "./components/Admin";
 import AdminSidebar, { type AdminTab } from "./components/AdminSidebar";
+import AdminNavbar from "./components/AdminNavbar";
 import UserProfilePage from "./components/UserProfile";
 import Login from "./components/Login";
 import WelcomeModal from "./components/WelcomeModal";
@@ -656,13 +657,22 @@ export default function App() {
         ) : route.path === "generate" ? (
           <Generate token={token} />
         ) : route.path === "admin" && userProfile?.is_admin ? (
-          <Admin
-            token={token}
-            tab={adminTab}
-            onChangeTab={setAdminTab}
-            onBack={() => navigate({ path: "home" })}
-            onViewUser={handleViewUser}
-          />
+          <div className="flex-1 flex flex-col min-h-0">
+            <AdminNavbar
+              userProfile={userProfile}
+              collapsed={adminCollapsed}
+              onToggleCollapse={() => setAdminCollapsed((x) => !x)}
+              onBack={() => navigate({ path: "home" })}
+              onLogout={handleLogout}
+            />
+            <Admin
+              token={token}
+              tab={adminTab}
+              onChangeTab={setAdminTab}
+              onBack={() => navigate({ path: "home" })}
+              onViewUser={handleViewUser}
+            />
+          </div>
         ) : route.path === "chat" && currentPersona ? (
           <div className="flex-1 flex min-h-0">
             <div className="flex-1 flex flex-col min-h-0 min-w-0">
