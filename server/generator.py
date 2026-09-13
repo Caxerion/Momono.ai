@@ -3,6 +3,7 @@ import base64
 import httpx
 import os
 import uuid
+from functools import partial
 from pathlib import Path
 
 GENERATED_DIR = Path(__file__).parent / "generated"
@@ -35,65 +36,74 @@ async def _download_url(url: str) -> bytes:
         return r.content
 
 
-# ─── Provider: OpenAI DALL-E 3 ────────────────────────────────────────────────
+# ─── Provider: OpenAI (GPT-Image-1) ──────────────────────────────────────────
 
-async def generate_dalle3(prompt: str, size: str = "1024x1024", quality: str = "standard") -> str:
+async def generate_dalle3(prompt: str, size: str = "1024x1024", quality: str = "medium") -> str:
     """
-    Generate image via OpenAI DALL-E 3.
+    Generate image via OpenAI GPT-Image-1.
     Returns filename saved in generated/.
     """
     if not OPENAI_API_KEY:
         raise ValueError("OPENAI_API_KEY not set")
 
-    async with httpx.AsyncClient(timeout=120) as client:
+    async with httpx.AsyncClient(timeout=180) as client:
         resp = await client.post(
             "https://api.openai.com/v1/images/generations",
             headers={"Authorization": f"Bearer {OPENAI_API_KEY}"},
             json={
-                "model": "dall-e-3",
+                "model": "gpt-image-1",
                 "prompt": prompt,
                 "n": 1,
                 "size": size,
                 "quality": quality,
-                "response_format": "b64_json",
             },
         )
         resp.raise_for_status()
         data = resp.json()
-        b64 = data["data"][0]["b64_json"]
+        b64 = data["data"][0].get("b64_json")
+        if not b64:
+            raise ValueError("No b64_json data in OpenAI response")
         return _save_b64(b64, ".png")
 
 
-# ─── Provider: Stability AI (SDXL) ────────────────────────────────────────────
+# ─── Provider: Stability AI (v2beta stable-image) ────────────────────────────
 
-async def generate_stability(prompt: str, width: int = 1024, height: int = 1024) -> str:
+async def generate_stability(
+    prompt: str,
+    model: str = "core",
+    width: int = 1024,
+    height: int = 1024,
+    steps: int = 30,
+    cfg_scale: int = 7,
+) -> str:
     """
-    Generate image via Stability AI (SDXL).
+    Generate image via Stability AI v2beta stable-image API.
     Returns filename saved in generated/.
     """
     if not STABILITY_API_KEY:
         raise ValueError("STABILITY_API_KEY not set")
 
-    async with httpx.AsyncClient(timeout=120) as client:
-        resp = await client.post(
-            "https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image",
-            headers={
-                "Authorization": f"Bearer {STABILITY_API_KEY}",
-                "Accept": "application/json",
-            },
-            data={
-                "text_prompts[0][text]": prompt,
-                "text_prompts[0][weight]": 1,
-                "cfg_scale": 7,
-                "width": width,
-                "height": height,
-                "samples": 1,
-                "steps": 30,
-            },
-        )
+    url = f"https://api.stability.ai/v2beta/stable-image/generate/{model}"
+    headers = {
+        "Authorization": f"Bearer {STABILITY_API_KEY}",
+        "Accept": "application/json",
+    }
+    files = {
+        "prompt": (None, prompt),
+        "output_format": (None, "png"),
+        "width": (None, str(width)),
+        "height": (None, str(height)),
+        "steps": (None, str(steps)),
+        "cfg_scale": (None, str(cfg_scale)),
+    }
+
+    async with httpx.AsyncClient(timeout=180) as client:
+        resp = await client.post(url, headers=headers, files=files)
         resp.raise_for_status()
         data = resp.json()
-        b64 = data["artifacts"][0]["base64"]
+        b64 = data.get("image") or (data.get("artifacts") or [{}])[0].get("base64")
+        if not b64:
+            raise ValueError("No image data in Stability response")
         return _save_b64(b64, ".png")
 
 
@@ -165,15 +175,16 @@ async def generate_video_replicate(prompt: str) -> str:
 # ─── Unified API ───────────────────────────────────────────────────────────────
 
 MODEL_MAP = {
-    # image models
+    # image models (urutan ini menentukan default pilihan di UI)
+    "sdxl":         ("image", partial(generate_stability, model="core")),
+    "sd3":          ("image", partial(generate_stability, model="sd3")),
     "dalle3":       ("image", generate_dalle3),
-    "sdxl":         ("image", generate_stability),
     "hf-sdxl":      ("image", generate_hf),
     # video models
     "svd":          ("video", generate_video_replicate),
 }
 
-DEFAULT_MODEL = "dalle3"
+DEFAULT_MODEL = "sdxl"
 
 
 async def generate(model: str | None = None, prompt: str = "", **kwargs) -> dict:
@@ -181,7 +192,7 @@ async def generate(model: str | None = None, prompt: str = "", **kwargs) -> dict
     Unified generate entry point.
 
     Args:
-        model:  Model key from MODEL_MAP (default: "dalle3").
+        model:  Model key from MODEL_MAP (default: "sdxl").
         prompt: Text prompt.
         **kwargs: Extra params forwarded to the provider (size, quality, etc.).
 
@@ -193,12 +204,6 @@ async def generate(model: str | None = None, prompt: str = "", **kwargs) -> dict
         raise ValueError(f"Unknown model: {model}. Available: {list(MODEL_MAP.keys())}")
 
     kind, fn = MODEL_MAP[model]
-
-    # forward kwargs for flexibility
-    if kind == "image" and model == "hf-sdxl":
-        # HF provider uses model kwarg
-        filename = await fn(prompt, **kwargs)
-    else:
-        filename = await fn(prompt, **kwargs)
+    filename = await fn(prompt, **kwargs)
 
     return {"filename": filename, "type": kind}

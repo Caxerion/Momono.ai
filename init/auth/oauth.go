@@ -63,6 +63,34 @@ func GitHubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if ghUser.Email == "" {
+		emailsResp, err := client.Get("https://api.github.com/user/emails")
+		if err == nil {
+			defer emailsResp.Body.Close()
+			var emails []struct {
+				Email   string `json:"email"`
+				Primary bool   `json:"primary"`
+				Verified bool  `json:"verified"`
+			}
+			if json.NewDecoder(emailsResp.Body).Decode(&emails) == nil {
+				for _, e := range emails {
+					if e.Primary && e.Verified {
+						ghUser.Email = e.Email
+						break
+					}
+				}
+				if ghUser.Email == "" {
+					for _, e := range emails {
+						if e.Verified {
+							ghUser.Email = e.Email
+							break
+						}
+					}
+				}
+			}
+		}
+	}
+
 	githubID := strconv.Itoa(ghUser.ID)
 	userID, err := FindUserByGithubID(githubID)
 	if err != nil {

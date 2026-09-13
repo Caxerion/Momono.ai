@@ -1,15 +1,20 @@
 import hashlib
+import logging
 import os
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
+import httpx
 from db import connect, init_db
 from fastapi import FastAPI, File, Request, UploadFile
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from generator import generate, MODEL_MAP
 from llm import load_config, stream_chat
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("momono")
 
 app = FastAPI()
 cfg = load_config()
@@ -588,14 +593,28 @@ def list_generate_models():
         name: {
             "type": kind,
             "label": {
-                "dalle3": "DALL-E 3",
-                "sdxl": "Stable Diffusion XL",
+                "dalle3": "OpenAI GPT-Image",
+                "sdxl": "Stability Core",
+                "sd3": "Stability SD3",
                 "hf-sdxl": "Flux (Free)",
                 "svd": "Stable Video Diffusion",
             }.get(name, name),
         }
         for name, (kind, _) in MODEL_MAP.items()
     }
+
+
+def _gen_error_message(exc: Exception) -> str:
+    if isinstance(exc, httpx.HTTPStatusError):
+        body = (exc.response.text or "")[:200]
+        return f"Provider AI menolak: HTTP {exc.response.status_code} {body}"
+    if isinstance(exc, httpx.ConnectError):
+        if "huggingface" in str(exc).lower() or "getaddrinfo" in str(exc).lower():
+            return "Tidak bisa terhubung ke provider (domain kemungkinan diblokir ISP, nyalakan VPN). Coba model Stability Core."
+        return "Tidak bisa terhubung ke provider AI (cek koneksi internet / VPN)"
+    if isinstance(exc, httpx.TimeoutException):
+        return "Provider AI terlalu lama merespons, coba lagi"
+    return str(exc) or exc.__class__.__name__
 
 
 @app.post("/api/generate")
@@ -605,13 +624,14 @@ async def api_generate(req: Request):
     if not prompt:
         return {"error": "prompt is required"}
 
-    model = body.get("model") or "dalle3"
+    model = body.get("model") or "sdxl"
     try:
         result = await generate(model=model, prompt=prompt)
     except ValueError as exc:
         return {"error": str(exc)}
-    except Exception:
-        return {"error": "generation failed, please try again"}
+    except Exception as exc:
+        logger.exception("Generate failed (model=%s)", model)
+        return {"error": _gen_error_message(exc)}
 
     return {
         "url": f"/generated/{result['filename']}",

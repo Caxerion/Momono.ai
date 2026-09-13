@@ -87,6 +87,7 @@ func run() {
 	mux.HandleFunc("GET /api/users/{id}", auth.PublicUserProfileHandler)
 	mux.Handle("/api/", auth.RequireAuth(proxy))
 	mux.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("../uploads"))))
+	mux.Handle("/generated/", http.StripPrefix("/generated/", http.FileServer(http.Dir("../server/generated"))))
 	mux.Handle("/", http.FileServer(http.Dir(distDir)))
 
 	srv := &http.Server{Addr: ":" + webPort, Handler: mux}
