@@ -1,10 +1,11 @@
 import asyncio
 import base64
-import httpx
 import os
 import uuid
 from functools import partial
 from pathlib import Path
+
+import httpx
 
 GENERATED_DIR = Path(__file__).parent / "generated"
 GENERATED_DIR.mkdir(exist_ok=True)

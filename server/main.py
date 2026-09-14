@@ -3,7 +3,7 @@ import logging
 import os
 import random
 import uuid
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 
 import httpx
@@ -12,7 +12,7 @@ from db import connect, init_db
 from fastapi import FastAPI, File, Request, UploadFile
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
-from generator import generate, MODEL_MAP
+from generator import MODEL_MAP, generate
 from llm import load_config, stream_chat
 
 logging.basicConfig(level=logging.INFO)
@@ -69,7 +69,7 @@ def rank_discover(items: list[dict], seed_key: str) -> list[dict]:
     tapi berotasi tiap hari baru. Jitter dibatasi < bobot 1 like supaya
     persona populer tetap di atas, sisanya yang lebar bucket-nya ikut shuffle.
     """
-    seed = int(hashlib.md5(f"{seed_key}:{date.today().isoformat()}".encode()).hexdigest(), 16) % (2**32)
+    seed = int(hashlib.md5(f"{seed_key}:{datetime.now(timezone.utc).date().isoformat()}".encode()).hexdigest(), 16) % (2**32)
     rng = random.Random(seed)
     jitter = {p["id"]: rng.uniform(0, 1) for p in items}
     w = RANK_WEIGHTS

@@ -1,13 +1,12 @@
 import os
 import sqlite3
 from contextlib import contextmanager
-from datetime import date, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from db import connect
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException, Request
-
-from db import connect
 
 AUTH_DB = Path(__file__).resolve().parent.parent / "init" / "auth.db"
 
@@ -55,7 +54,7 @@ def admin_stats(req: Request):
         reports = conn.execute("SELECT COUNT(*) FROM user_reports").fetchone()[0]
 
     # Trend 7 hari terakhir: user baru & pesan per hari (dari-saat-ini mundur 6 hari)
-    today = date.today()
+    today = datetime.now(timezone.utc).date()
     days = [today - timedelta(days=i) for i in range(6, -1, -1)]
     user_day = {}
     msg_day = {}
