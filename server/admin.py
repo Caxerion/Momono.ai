@@ -88,19 +88,22 @@ def admin_stats(req: Request):
             }
         )
 
-    # Distribusi per kategori (top 4 + lainnya)
+    # Distribusi per kategori (top 4) — kategori disimpan sebagai CSV di personas.categories
     with connect() as conn:
-        cat_rows = conn.execute(
-            """
-            SELECT c.value AS cat, COUNT(*) AS n
-            FROM personas p
-            LEFT JOIN persona_categories c ON c.persona_id = p.id
-            GROUP BY c.value
-            ORDER BY n DESC
-            LIMIT 4
-            """
+        rows = conn.execute(
+            "SELECT COALESCE(categories,'') AS categories FROM personas"
         ).fetchall()
-    cats = [dict(r) for r in cat_rows]
+    cat_counts: dict[str, int] = {}
+    for (cats,) in rows:
+        for c in cats.split(","):
+            c = c.strip()
+            if c:
+                cat_counts[c] = cat_counts.get(c, 0) + 1
+    cats = sorted(
+        ({"cat": k, "n": v} for k, v in cat_counts.items()),
+        key=lambda x: x["n"],
+        reverse=True,
+    )[:4]
 
     return {
         "users": users,
@@ -218,6 +221,59 @@ def admin_reports(req: Request):
             }
         )
     return out
+
+
+@router.get("/chat-models")
+def admin_chat_models(req: Request):
+    _guard(req)
+    with connect() as conn:
+        rows = conn.execute(
+            """
+            SELECT key, label, COALESCE(description,'') AS description,
+                   COALESCE(prompt_tier1,'') AS prompt_tier1,
+                   COALESCE(prompt_tier2,'') AS prompt_tier2,
+                   COALESCE(sort_order,0) AS sort_order
+            FROM chat_models ORDER BY sort_order, key
+            """
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+@router.put("/chat-models/{key}")
+async def admin_update_chat_model(key: str, req: Request):
+    _guard(req)
+    body = await req.json()
+    label = str(body.get("label") or "").strip()
+    if not label:
+        raise HTTPException(status_code=400, detail="label required")
+    description = str(body.get("description") or "").strip()
+    prompt_tier1 = str(body.get("prompt_tier1") or "").strip()
+    prompt_tier2 = str(body.get("prompt_tier2") or "").strip()
+    sort_order = int(body.get("sort_order") or 0)
+    with connect() as conn:
+        exists = conn.execute(
+            "SELECT key FROM chat_models WHERE key=?", (key,)
+        ).fetchone()
+        if not exists:
+            conn.execute(
+                """
+                INSERT INTO chat_models
+                    (key, label, description, prompt_tier1, prompt_tier2, sort_order)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (key, label, description, prompt_tier1, prompt_tier2, sort_order),
+            )
+        else:
+            conn.execute(
+                """
+                UPDATE chat_models
+                SET label=?, description=?, prompt_tier1=?, prompt_tier2=?, sort_order=?
+                WHERE key=?
+                """,
+                (label, description, prompt_tier1, prompt_tier2, sort_order, key),
+            )
+        conn.commit()
+    return {"ok": True}
 
 
 @router.delete("/personas/{pid}")

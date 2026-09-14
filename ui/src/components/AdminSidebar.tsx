@@ -2,6 +2,7 @@ import { type ReactNode } from "react";
 import {
   ArrowLeft,
   BarChart3,
+  Bot,
   FileWarning,
   LayoutDashboard,
   LogOut,
@@ -19,7 +20,8 @@ export type AdminTab =
   | "users"
   | "personas"
   | "reports"
-  | "conversations";
+  | "conversations"
+  | "chat-models";
 
 type Props = {
   collapsed: boolean;
@@ -46,10 +48,11 @@ const SECTIONS: { label: string; items: { key: AdminTab; label: string; icon: Re
       { key: "reports", label: "Reports", icon: <FileWarning size={16} /> },
     ],
   },
-  {
+{
     label: "Catalog",
     items: [
       { key: "personas", label: "Personas", icon: <BarChart3 size={16} /> },
+      { key: "chat-models", label: "Chat Models", icon: <Bot size={16} /> },
     ],
   },
 ];

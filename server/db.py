@@ -1,7 +1,7 @@
 import sqlite3
 from contextlib import contextmanager
 
-from config import DB_PATH
+from config import CHAT_MODELS, DB_PATH
 
 
 def init_db() -> None:
@@ -147,7 +147,20 @@ def init_db() -> None:
             )
             """
         )
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS chat_models (
+                key TEXT PRIMARY KEY,
+                label TEXT NOT NULL,
+                description TEXT NOT NULL DEFAULT '',
+                prompt_tier1 TEXT NOT NULL DEFAULT '',
+                prompt_tier2 TEXT NOT NULL DEFAULT '',
+                sort_order INTEGER NOT NULL DEFAULT 0
+            )
+            """
+        )
         seed_categories(cur)
+        seed_chat_models(cur)
         conn.commit()
 
 
@@ -175,6 +188,29 @@ def seed_categories(cur) -> None:
     cur.executemany(
         "INSERT OR IGNORE INTO categories (name) VALUES (?)",
         [(name,) for name in default_categories],
+    )
+
+
+def seed_chat_models(cur) -> None:
+    # INSERT OR IGNORE: baris yang sudah diedit admin tidak akan ditimpa
+    # saat restart; key baru dari config tetap masuk.
+    cur.executemany(
+        """
+        INSERT OR IGNORE INTO chat_models
+            (key, label, description, prompt_tier1, prompt_tier2, sort_order)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        [
+            (
+                m["key"],
+                m["label"],
+                m.get("description", ""),
+                m.get("prompt_tier1", ""),
+                m.get("prompt_tier2", ""),
+                m.get("sort_order", 0),
+            )
+            for m in CHAT_MODELS
+        ],
     )
 
 

@@ -61,6 +61,12 @@ export default function App() {
   const [showWelcome, setShowWelcome] = useState(false);
   const [adminTab, setAdminTab] = useState<AdminTab>("dashboard");
   const [adminCollapsed, setAdminCollapsed] = useState(false);
+  const [tiers, setTiers] = useState<{ key: string; label: string }[]>([]);
+  const [chatModels, setChatModels] = useState<
+    { key: string; label: string; description?: string }[]
+  >([]);
+  const [tier, setTier] = useState("tier1");
+  const [chatModel, setChatModel] = useState("standard");
 
   const selectingRef = useRef<string | null>(null);
   const triedRef = useRef<string | null>(null);
@@ -73,6 +79,16 @@ export default function App() {
       window.history.replaceState({}, "", window.location.pathname);
     }
   }, []);
+
+  useEffect(() => {
+    getJSON("/api/models").then((d) => {
+      if (Array.isArray(d)) setTiers(d);
+    });
+    getJSON("/api/chat-models").then((d) => {
+      if (Array.isArray(d)) setChatModels(d);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   function authHeaders(): Record<string, string> {
     return token ? { Authorization: `Bearer ${token}` } : {};
@@ -386,6 +402,8 @@ export default function App() {
         persona_id: pid,
         system_prompt: DEFAULT_PROMPT,
         user_name: userProfile?.display_name || "",
+        tier,
+        chat_model: chatModel,
       }),
     });
     if (r.status === 401) {
@@ -444,6 +462,8 @@ export default function App() {
         user_name: userProfile?.display_name || "",
         is_regenerate: true,
         regenerate_index: nextIdx,
+        tier,
+        chat_model: chatModel,
       }),
     });
     if (r.status === 401) {
@@ -700,6 +720,12 @@ export default function App() {
                   onOpenPersonaProfile={() => navigate({ path: "profile", personaId: currentPersona.id })}
                   onToggleSidebar={() => setShowCharacterSidebar(!showCharacterSidebar)}
                   sidebarOpen={showCharacterSidebar}
+                  tiers={tiers}
+                  chatModels={chatModels}
+                  tier={tier}
+                  chatModel={chatModel}
+                  onTierChange={setTier}
+                  onChatModelChange={setChatModel}
                   dark={dark}
                   onToggleDark={() => setDark(!dark)}
                   onOpenSettings={() => setSettingsOpen(true)}
@@ -716,6 +742,12 @@ export default function App() {
               onSelectConversation={handleSelectConversation}
               onViewProfile={(p) => navigate({ path: "profile", personaId: p.id })}
               onViewUser={handleViewUser}
+              tiers={tiers}
+              chatModels={chatModels}
+              tier={tier}
+              chatModel={chatModel}
+              onTierChange={setTier}
+              onChatModelChange={setChatModel}
             />
           </div>
         ) : (
@@ -739,6 +771,12 @@ export default function App() {
               }
               onToggleSidebar={() => setShowCharacterSidebar(!showCharacterSidebar)}
               sidebarOpen={showCharacterSidebar}
+              tiers={tiers}
+              chatModels={chatModels}
+              tier={tier}
+              chatModel={chatModel}
+              onTierChange={setTier}
+              onChatModelChange={setChatModel}
               dark={dark}
               onToggleDark={() => setDark(!dark)}
               onOpenSettings={() => setSettingsOpen(true)}

@@ -13,6 +13,8 @@ import {
   ChevronDown,
   ChevronUp,
   ImageIcon,
+  Bot,
+  X,
 } from "lucide-react";
 import type { Conversation, Persona, PersonaReactions } from "../types";
 import { navLink } from "../lib/link";
@@ -27,6 +29,12 @@ type Props = {
   onSelectConversation: (id: string) => void;
   onViewProfile: (p: Persona) => void;
   onViewUser?: (userId: number | string) => void;
+  tiers?: { key: string; label: string }[];
+  chatModels?: { key: string; label: string; description?: string }[];
+  tier?: string;
+  chatModel?: string;
+  onTierChange?: (t: string) => void;
+  onChatModelChange?: (k: string) => void;
 };
 
 export default function CharacterSidebar({
@@ -39,9 +47,16 @@ export default function CharacterSidebar({
   onSelectConversation,
   onViewProfile,
   onViewUser,
+  tiers,
+  chatModels,
+  tier,
+  chatModel,
+  onTierChange,
+  onChatModelChange,
 }: Props) {
   const [copied, setCopied] = useState(false);
   const [showAllCategories, setShowAllCategories] = useState(false);
+  const [showChatModels, setShowChatModels] = useState(false);
   const [reactions, setReactions] = useState<PersonaReactions>({
     likes: persona.likes ?? 0,
     dislikes: persona.dislikes ?? 0,
@@ -59,6 +74,9 @@ export default function CharacterSidebar({
     .filter(Boolean);
   const visibleCategories = showAllCategories ? categories : categories.slice(0, 3);
   const hasMore = categories.length > 3;
+
+  const activeTier = (tiers ?? []).find((t) => t.key === (tier ?? "tier1"));
+  const activeChatModel = (chatModels ?? []).find((m) => m.key === (chatModel ?? "standard"));
 
   // Reset status error setiap ganti persona, biar avatar persona baru
   // dicoba di-load lagi dari awal (bukan ketahan error dari persona sebelumnya).
@@ -319,6 +337,20 @@ export default function CharacterSidebar({
                 <span>Profile</span>
               </button>
             </div>
+
+            <button
+              onClick={() => setShowChatModels(true)}
+              title="Pilih chat model"
+              className="mt-2 w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+            >
+              <Bot size={16} className="text-emerald-500 shrink-0" />
+              <span>Chat Models</span>
+              <span className="ml-auto text-[11px] text-zinc-400 truncate">
+                {activeChatModel?.label ?? "Standard"}
+                {activeTier ? ` · ${activeTier.label}` : ""}
+              </span>
+              <ChevronDown size={14} className="text-zinc-400 shrink-0" />
+            </button>
           </div>
 
           {/* Chat History */}
@@ -394,6 +426,102 @@ export default function CharacterSidebar({
               >
                 Remove
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showChatModels && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          onClick={() => setShowChatModels(false)}
+        >
+          <div
+            className="w-96 max-w-[92vw] rounded-2xl bg-white dark:bg-zinc-900 shadow-2xl p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+                  <Bot size={18} className="text-emerald-500" />
+                  Chat Models
+                </h3>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                  Atur mode engine dan gaya respons untuk chat ini.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowChatModels(false)}
+                title="Tutup"
+                className="rounded-lg p-1.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="mt-5">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400">
+                Mode
+              </span>
+              <div className="mt-1.5 flex rounded-full bg-zinc-100 dark:bg-zinc-800 p-0.5">
+                {(tiers ?? []).map((t) => (
+                  <button
+                    key={t.key}
+                    type="button"
+                    onClick={() => onTierChange?.(t.key)}
+                    title={t.label}
+                    className={`flex-1 px-2.5 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                      (tier ?? "tier1") === t.key
+                        ? "bg-white dark:bg-zinc-600 text-zinc-900 dark:text-white shadow-sm"
+                        : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-5">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400">
+                Gaya / Chat Model
+              </span>
+              <div className="mt-1.5 space-y-1.5 max-h-64 overflow-y-auto sidebar-scroll">
+                {(chatModels ?? []).length === 0 && (
+                  <p className="text-sm text-zinc-400 py-4 text-center">
+                    Belum ada chat model.
+                  </p>
+                )}
+                {(chatModels ?? []).map((m) => {
+                  const active = (chatModel ?? "standard") === m.key;
+                  return (
+                    <button
+                      key={m.key}
+                      type="button"
+                      onClick={() => onChatModelChange?.(m.key)}
+                      className={`w-full text-left flex items-start gap-2.5 rounded-xl px-3 py-2.5 transition-colors border ${
+                        active
+                          ? "border-emerald-500/60 bg-emerald-50 dark:bg-emerald-900/20"
+                          : "border-transparent bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                      }`}
+                    >
+                      <span className="flex-1 min-w-0">
+                        <span className="block text-sm font-semibold text-zinc-800 dark:text-zinc-100">
+                          {m.label}
+                        </span>
+                        {m.description && (
+                          <span className="block text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                            {m.description}
+                          </span>
+                        )}
+                      </span>
+                      {active && (
+                        <Check size={16} className="text-emerald-500 mt-0.5 shrink-0" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>

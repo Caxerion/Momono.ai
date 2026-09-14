@@ -13,7 +13,7 @@ from fastapi import FastAPI, File, Request, UploadFile
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from generator import MODEL_MAP, generate
-from llm import load_config, stream_chat
+from llm import get_chat_model, list_chat_models, list_tiers, load_config, stream_chat
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("momono")
@@ -99,6 +99,16 @@ def health():
     return {"status": "ok", "model": cfg["model"]}
 
 
+@app.get("/api/models")
+def models():
+    return list_tiers()
+
+
+@app.get("/api/chat-models")
+def chat_models():
+    return list_chat_models()
+
+
 @app.get("/api/conversations")
 def list_conversations(req: Request, persona_id: str | None = None):
     user_id = current_user(req)
@@ -181,6 +191,8 @@ async def chat(req: Request):
     user_name = data.get("user_name", "")
     is_regenerate = data.get("is_regenerate", False)
     regenerate_index = data.get("regenerate_index", 0)
+    tier = data.get("tier", "tier1")
+    cfg = load_config(tier)
     if cid:
         with connect() as conn:
             conv = conn.execute(
@@ -222,6 +234,11 @@ async def chat(req: Request):
 
     if not history and greeting:
         history = [{"role": "assistant", "content": resolve_user_vars(greeting, user_name)}]
+
+    chat_model_key = data.get("chat_model", "standard")
+    style = get_chat_model(chat_model_key, tier)
+    if style and style.get("prompt"):
+        persona_prompt = (persona_prompt + "\n\n" + style["prompt"]).strip()
 
     messages = []
     if persona_prompt:

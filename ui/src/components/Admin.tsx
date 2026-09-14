@@ -3,6 +3,7 @@ import {
   Activity,
   ArrowLeft,
   BarChart3,
+  Bot,
   ExternalLink,
   FileWarning,
   Hash,
@@ -10,6 +11,7 @@ import {
   Loader2,
   MessageCircle,
   MessagesSquare,
+  Save,
   Shield,
   TrendingDown,
   TrendingUp,
@@ -78,12 +80,22 @@ type AdminConversation = {
   updated_at: string;
 };
 
+type AdminChatModel = {
+  key: string;
+  label: string;
+  description: string;
+  prompt_tier1: string;
+  prompt_tier2: string;
+  sort_order: number;
+};
+
 export type Tab =
   | "dashboard"
   | "users"
   | "personas"
   | "reports"
-  | "conversations";
+  | "conversations"
+  | "chat-models";
 
 export type { Tab as AdminTab };
 
@@ -117,6 +129,7 @@ export default function Admin({ token, tab, onChangeTab, onBack, onViewUser }: P
   const [personas, setPersonas] = useState<AdminPersona[]>([]);
   const [reports, setReports] = useState<AdminReport[]>([]);
   const [conversations, setConversations] = useState<AdminConversation[]>([]);
+  const [chatModels, setChatModels] = useState<AdminChatModel[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -144,6 +157,10 @@ export default function Admin({ token, tab, onChangeTab, onBack, onViewUser }: P
       const c = await getJSON<AdminConversation[]>("/api/admin/conversations", token);
       if (c) setConversations(c);
       else setError("Gagal memuat percakapan.");
+    } else if (tab === "chat-models") {
+      const m = await getJSON<AdminChatModel[]>("/api/admin/chat-models", token);
+      if (m) setChatModels(m);
+      else setError("Gagal memuat chat models.");
     }
     setLoading(false);
   }, [tab, token]);
@@ -183,6 +200,7 @@ export default function Admin({ token, tab, onChangeTab, onBack, onViewUser }: P
     { key: "personas", label: "Personas", icon: <BarChart3 size={16} /> },
     { key: "reports", label: "Reports", icon: <FileWarning size={16} /> },
     { key: "conversations", label: "Conversations", icon: <MessagesSquare size={16} /> },
+    { key: "chat-models", label: "Chat Models", icon: <Bot size={16} /> },
   ];
 
   return (
@@ -254,6 +272,8 @@ export default function Admin({ token, tab, onChangeTab, onBack, onViewUser }: P
           <PersonasTable personas={personas} busyId={busyId} onDelete={deletePersona} onViewUser={onViewUser} />
         ) : tab === "reports" ? (
           <ReportsTable reports={reports} busyId={busyId} onResolve={resolveReport} onViewUser={onViewUser} />
+        ) : tab === "chat-models" ? (
+          <ChatModelsEditor models={chatModels} token={token} onSaved={load} />
         ) : (
           <ConversationsTable conversations={conversations} onViewUser={onViewUser} />
         )}
@@ -440,7 +460,7 @@ function Dashboard({ stats }: { stats: Stats | null }) {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Ikhtisar</h2>
+        <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Charts</h2>
         <p className="text-xs text-zinc-400 mt-0.5">
           Ringkasan aktivitas dan pertumbuhan platform Momono.
         </p>
@@ -725,5 +745,145 @@ function ConversationsTable({
         </tr>
       ))}
     </Table>
+  );
+}
+
+function ChatModelsEditor({
+  models,
+  token,
+  onSaved,
+}: {
+  models: AdminChatModel[];
+  token: string | null;
+  onSaved: () => void;
+}) {
+  const [drafts, setDrafts] = useState<Record<string, AdminChatModel>>({});
+  const [saving, setSaving] = useState<string | null>(null);
+  const [savedKey, setSavedKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    const map: Record<string, AdminChatModel> = {};
+    for (const m of models) map[m.key] = { ...m };
+    setDrafts(map);
+  }, [models]);
+
+  function update(key: string, patch: Partial<AdminChatModel>) {
+    setDrafts((d) => ({ ...d, [key]: { ...(d[key] as AdminChatModel), ...patch } }));
+  }
+
+  async function save(m: AdminChatModel) {
+    setSaving(m.key);
+    const ok = await getJSON<{ ok: boolean }>(`/api/admin/chat-models/${m.key}`, token, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        label: m.label,
+        description: m.description,
+        prompt_tier1: m.prompt_tier1,
+        prompt_tier2: m.prompt_tier2,
+        sort_order: m.sort_order,
+      }),
+    });
+    setSaving(null);
+    if (ok?.ok) {
+      setSavedKey(m.key);
+      window.setTimeout(() => setSavedKey(null), 1500);
+      onSaved();
+    }
+  }
+
+  const done = (m: AdminChatModel) =>
+    JSON.stringify(drafts[m.key]) === JSON.stringify(m);
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Chat Models</h2>
+        <p className="text-xs text-zinc-400 mt-0.5">
+          Gaya respons per chat. Tier 1 = engine dengan guardrail (opsi prompt ringan/suggestif),
+          Tier 2 = engine uncensored. Sesuaikan percabangan prompt di sini.
+        </p>
+      </div>
+
+      {models.length === 0 && (
+        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-8 text-center text-sm text-zinc-400">
+          Belum ada chat model.
+        </div>
+      )}
+
+      {models.map((m) => {
+        const draft = drafts[m.key] ?? m;
+        const isSaved = savedKey === m.key;
+        const isSaving = saving === m.key;
+        return (
+          <div
+            key={m.key}
+            className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm"
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide">
+                {m.key}
+              </span>
+              <input
+                value={draft.label}
+                onChange={(e) => update(m.key, { label: e.target.value })}
+                className="rounded-lg border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 px-2.5 py-1 text-sm font-semibold text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/60"
+              />
+              <span className="text-xs text-zinc-400">Urutan</span>
+              <input
+                type="number"
+                value={draft.sort_order}
+                onChange={(e) => update(m.key, { sort_order: Number(e.target.value) || 0 })}
+                className="w-20 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 px-2.5 py-1 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/60"
+              />
+              <button
+                onClick={() => save(draft)}
+                disabled={isSaving || done(draft)}
+                className="ml-auto inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 text-white text-sm font-medium px-3 py-1.5 hover:bg-emerald-700 disabled:opacity-50 transition-colors focus:outline-none"
+              >
+                {isSaving ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <Save size={14} />
+                )}
+                {isSaving ? "Menyimpan..." : isSaved ? "Tersimpan" : "Simpan"}
+              </button>
+            </div>
+
+            <input
+              value={draft.description}
+              onChange={(e) => update(m.key, { description: e.target.value })}
+              placeholder="Deskripsi singkat (ditampilkan sebagai tooltip)"
+              className="mt-3 w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 px-3 py-1.5 text-sm text-zinc-700 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/60 placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
+            />
+
+            <div className="mt-3 grid gap-3 md:grid-cols-2">
+              <label className="block">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400">
+                  Prompt Tier 1 (Normal)
+                </span>
+                <textarea
+                  value={draft.prompt_tier1}
+                  onChange={(e) => update(m.key, { prompt_tier1: e.target.value })}
+                  rows={5}
+                  className="mt-1 w-full resize-y rounded-lg border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 px-3 py-2 text-sm text-zinc-700 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/60"
+                />
+              </label>
+              <label className="block">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400">
+                  Prompt Tier 2 (NSFW)
+                </span>
+                <textarea
+                  value={draft.prompt_tier2}
+                  onChange={(e) => update(m.key, { prompt_tier2: e.target.value })}
+                  rows={5}
+                  className="mt-1 w-full resize-y rounded-lg border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 px-3 py-2 text-sm text-zinc-700 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/60"
+                />
+              </label>
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 }

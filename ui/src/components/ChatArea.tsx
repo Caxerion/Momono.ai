@@ -68,6 +68,12 @@ type Props = {
   onToggleDark: () => void;
   onOpenSettings?: () => void;
   onLogout?: () => void;
+  tiers?: { key: string; label: string }[];
+  chatModels?: { key: string; label: string; description?: string }[];
+  tier?: string;
+  chatModel?: string;
+  onTierChange?: (t: string) => void;
+  onChatModelChange?: (k: string) => void;
 };
 
 // Lebar maksimum kolom percakapan — dipakai bareng buat area pesan & form input
@@ -276,6 +282,49 @@ export default function ChatArea(p: Props) {
           p.onSend();
         }}
       >
+        <div className={`${CHAT_COLUMN_CLASS} px-3 pt-2 pb-0 flex items-center gap-3 overflow-x-auto`}>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Mode</span>
+            <div className="flex rounded-full bg-zinc-100 dark:bg-zinc-800 p-0.5">
+              {(p.tiers ?? []).map((t) => (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() => p.onTierChange?.(t.key)}
+                  title={t.label}
+                  className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
+                    (p.tier ?? "tier1") === t.key
+                      ? "bg-white dark:bg-zinc-600 text-zinc-900 dark:text-white shadow-sm"
+                      : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Model</span>
+            <div className="flex rounded-full bg-zinc-100 dark:bg-zinc-800 p-0.5">
+              {(p.chatModels ?? []).map((m) => (
+                <button
+                  key={m.key}
+                  type="button"
+                  onClick={() => p.onChatModelChange?.(m.key)}
+                  title={m.description ?? m.label}
+                  className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
+                    (p.chatModel ?? "standard") === m.key
+                      ? "bg-white dark:bg-zinc-600 text-zinc-900 dark:text-white shadow-sm"
+                      : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                  }`}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
         <div className={`${CHAT_COLUMN_CLASS} p-3 flex items-center gap-2`}>
           <button
             type="button"
