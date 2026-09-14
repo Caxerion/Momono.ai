@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { Plus, Send } from "lucide-react";
+import { ArrowLeft, PanelRightClose, PanelRightOpen, Plus, Send, Sparkles } from "lucide-react";
+import AppNavbar from "./AppNavbar";
 import Avatar from "./Avatar";
 import type { Message, Persona, UserProfile } from "../types";
+import { navLink } from "../lib/link";
 
 function renderText(text: string) {
   if (!text) return null;
@@ -57,6 +59,15 @@ type Props = {
   busy: boolean;
   userProfile?: UserProfile | null;
   onViewUser?: (userId: number | string) => void;
+  onBack: () => void;
+  onOpenProfile: () => void;
+  onOpenPersonaProfile: () => void;
+  onToggleSidebar: () => void;
+  sidebarOpen: boolean;
+  dark: boolean;
+  onToggleDark: () => void;
+  onOpenSettings?: () => void;
+  onLogout?: () => void;
 };
 
 // Lebar maksimum kolom percakapan — dipakai bareng buat area pesan & form input
@@ -80,13 +91,58 @@ export default function ChatArea(p: Props) {
     lastBubble.responses[lastBubble.responses.length - 1].content !== "";
 
   return (
-    <main className="flex-1 flex flex-col bg-white dark:bg-zinc-950 min-h-0">
-      <header className="flex items-center gap-3 p-3 border-b border-zinc-200 dark:border-zinc-800">
-        <Avatar name={p.persona?.name ?? "Default"} size={36} src={p.persona?.avatar_url} />
-        <span className="font-semibold">{p.persona?.name ?? "Default"}</span>
-      </header>
-
+    <main className="relative flex-1 flex flex-col bg-white dark:bg-zinc-950 min-h-0">
       <div className="flex-1 overflow-y-auto">
+        <AppNavbar
+          left={
+            p.persona ? (
+              <button
+                onClick={p.onBack}
+                title="Back"
+                className="flex items-center justify-center -ml-1 p-2 -my-1 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+              >
+                <ArrowLeft size={18} />
+              </button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center shrink-0">
+                  <Sparkles size={14} className="text-white" strokeWidth={2.5} />
+                </div>
+                <span className="font-bold text-sm text-zinc-900 dark:text-zinc-100">
+                  Momono.ai
+                </span>
+              </div>
+            )
+          }
+          center={
+            p.persona ? (
+              <button
+                {...navLink(`#/profile/${p.persona.id}`, p.onOpenPersonaProfile)}
+                title="Lihat profil karakter"
+                className="flex items-center gap-2 max-w-full"
+              >
+                <div className="relative shrink-0">
+                  <Avatar name={p.persona.name} size={28} src={p.persona.avatar_url} />
+                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-zinc-950" />
+                </div>
+                <span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 truncate max-w-[180px] hover:underline underline-offset-4">
+                  {p.persona.name}
+                </span>
+              </button>
+            ) : (
+              <span className="font-semibold text-sm text-zinc-500 dark:text-zinc-400 truncate">
+                Mulai chat dengan karakter
+              </span>
+            )
+          }
+          userProfile={p.userProfile ?? null}
+          dark={p.dark}
+          onToggleDark={p.onToggleDark}
+          onOpenProfile={p.onOpenProfile}
+          onOpenSettings={p.onOpenSettings}
+          onLogout={p.onLogout}
+        />
+
         <div className={`${CHAT_COLUMN_CLASS} p-4 space-y-4`}>
           {p.messages.length === 0 && (
             <div className="text-center text-zinc-400 mt-10 px-4">
@@ -110,8 +166,11 @@ export default function ChatArea(p: Props) {
                 Created by{" "}
                 {p.persona?.user_id ? (
                   <button
-                    onClick={() => p.persona?.user_id && p.onViewUser?.(p.persona.user_id)}
-                    className="text-indigo-500 dark:text-indigo-400 hover:underline"
+                    {...navLink(
+                      `#/user/${p.persona.user_id}`,
+                      () => p.persona?.user_id && p.onViewUser?.(p.persona.user_id)
+                    )}
+                    className="text-emerald-500 dark:text-emerald-400 hover:underline"
                   >
                     @{p.persona.created_by || "Unknown"}
                   </button>
@@ -127,7 +186,7 @@ export default function ChatArea(p: Props) {
               return (
                 <div key={`u-${bi}`} className="flex gap-3 flex-row-reverse">
                   <Avatar name="You" emoji="🙂" size={36} />
-                  <div className="max-w-[70%] rounded-2xl px-4 py-2 whitespace-pre-wrap bg-indigo-600 text-white">
+                  <div className="max-w-[70%] rounded-2xl px-4 py-2 whitespace-pre-wrap bg-emerald-600 text-white">
                     {renderText(b.msg.content)}
                   </div>
                 </div>
@@ -156,7 +215,7 @@ export default function ChatArea(p: Props) {
               <div key={`g-${bi}`}>
                 <div className="flex gap-3 flex-row-reverse mb-3">
                   <Avatar name="You" emoji="🙂" size={36} />
-                  <div className="max-w-[70%] rounded-2xl px-4 py-2 whitespace-pre-wrap bg-indigo-600 text-white">
+                  <div className="max-w-[70%] rounded-2xl px-4 py-2 whitespace-pre-wrap bg-emerald-600 text-white">
                     {renderText(b.userMsg.content)}
                   </div>
                 </div>
@@ -227,7 +286,7 @@ export default function ChatArea(p: Props) {
           </button>
 
           <textarea
-            className="flex-1 resize-none rounded-full border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 px-5 py-3 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:border-indigo-500 transition-shadow leading-tight"
+            className="flex-1 resize-none rounded-full border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 px-5 py-3 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500 transition-shadow leading-tight"
             rows={1}
             value={p.input}
             placeholder="Type Anything..."
@@ -262,6 +321,20 @@ export default function ChatArea(p: Props) {
             className="w-64 h-64 rounded-full object-cover shadow-2xl"
           />
         </div>
+      )}
+
+      {p.persona && (
+        <button
+          onClick={p.onToggleSidebar}
+          title={p.sidebarOpen ? "Sembunyikan panel karakter" : "Buka panel karakter"}
+          className={`absolute right-2.5 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-8 h-8 rounded-full shadow-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
+            p.sidebarOpen
+              ? "bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-900/30"
+              : "bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-700"
+          }`}
+        >
+          {p.sidebarOpen ? <PanelRightClose size={16} /> : <PanelRightOpen size={16} />}
+        </button>
       )}
     </main>
   );

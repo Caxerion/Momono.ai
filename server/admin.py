@@ -1,6 +1,7 @@
 import os
 import sqlite3
 from contextlib import contextmanager
+from datetime import date, timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -52,12 +53,64 @@ def admin_stats(req: Request):
         conversations = conn.execute("SELECT COUNT(*) FROM conversations").fetchone()[0]
         messages = conn.execute("SELECT COUNT(*) FROM messages").fetchone()[0]
         reports = conn.execute("SELECT COUNT(*) FROM user_reports").fetchone()[0]
+
+    # Trend 7 hari terakhir: user baru & pesan per hari (dari-saat-ini mundur 6 hari)
+    today = date.today()
+    days = [today - timedelta(days=i) for i in range(6, -1, -1)]
+    user_day = {}
+    msg_day = {}
+    conv_day = {}
+    with auth_conn() as auth:
+        for (ds,) in auth.execute(
+            "SELECT date(created_at) FROM users WHERE created_at >= ?",
+            (f"{days[0]} 00:00:00",),
+        ).fetchall():
+            user_day[ds] = user_day.get(ds, 0) + 1
+    with connect() as conn:
+        for (ds,) in conn.execute(
+            "SELECT date(created_at) FROM messages"
+        ).fetchall():
+            msg_day[ds] = msg_day.get(ds, 0) + 1
+        for (ds,) in conn.execute(
+            "SELECT date(created_at) FROM conversations"
+        ).fetchall():
+            conv_day[ds] = conv_day.get(ds, 0) + 1
+
+    trend = []
+    for d in days:
+        ds = d.isoformat()
+        trend.append(
+            {
+                "date": ds,
+                "label": d.strftime("%a"),
+                "users": user_day.get(ds, 0),
+                "messages": msg_day.get(ds, 0),
+                "conversations": conv_day.get(ds, 0),
+            }
+        )
+
+    # Distribusi per kategori (top 4 + lainnya)
+    with connect() as conn:
+        cat_rows = conn.execute(
+            """
+            SELECT c.value AS cat, COUNT(*) AS n
+            FROM personas p
+            LEFT JOIN persona_categories c ON c.persona_id = p.id
+            GROUP BY c.value
+            ORDER BY n DESC
+            LIMIT 4
+            """
+        ).fetchall()
+    cats = [dict(r) for r in cat_rows]
+
     return {
         "users": users,
         "personas": personas,
         "conversations": conversations,
         "messages": messages,
         "reports": reports,
+        "trend": trend,
+        "categories": cats,
     }
 
 

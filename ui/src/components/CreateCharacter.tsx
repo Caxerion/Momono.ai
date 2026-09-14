@@ -202,8 +202,8 @@ export default function CreateCharacter({ persona, token, createdBy, onBack, onS
                   onClick={() => toggleCategory(cat.name)}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                     active
-                      ? "bg-indigo-600 text-white border-indigo-600"
-                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700 hover:border-indigo-400"
+                      ? "bg-emerald-600 text-white border-emerald-600"
+                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700 hover:border-emerald-400"
                   }`}
                 >
                   {cat.name}
@@ -218,7 +218,7 @@ export default function CreateCharacter({ persona, token, createdBy, onBack, onS
 
         <label className="block text-sm font-medium mb-1">About (character description)</label>
         <p className="text-xs text-zinc-400 mb-2">
-          Bisa juga pakai <code className="text-indigo-500 dark:text-indigo-400">{"{user}"}</code> untuk merujuk nama pemain.
+          Bisa juga pakai <code className="text-emerald-500 dark:text-emerald-400">{"{user}"}</code> untuk merujuk nama pemain.
         </p>
         <textarea
           className="w-full mb-4 rounded-lg border border-zinc-200 dark:border-zinc-700 p-2.5 bg-zinc-100 dark:bg-zinc-800 resize-y"
@@ -237,7 +237,7 @@ export default function CreateCharacter({ persona, token, createdBy, onBack, onS
           placeholder="*she waves her hand* Hey, you're here too?"
         />
         <p className="text-xs text-zinc-400 mb-4">
-          Pakai <code className="text-indigo-500 dark:text-indigo-400">{"{user}"}</code> untuk manggil nama pemain, contoh: "Hi {"{user}"}"
+          Pakai <code className="text-emerald-500 dark:text-emerald-400">{"{user}"}</code> untuk manggil nama pemain, contoh: "Hi {"{user}"}"
         </p>
 
         <label className="block text-sm font-medium mb-1">Character's Personality</label>
@@ -270,7 +270,7 @@ export default function CreateCharacter({ persona, token, createdBy, onBack, onS
               Cancel
             </button>
             <button
-              className="px-5 py-2 rounded-lg text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
+              className="px-5 py-2 rounded-lg text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
               disabled={busy || !name}
               onClick={save}
             >

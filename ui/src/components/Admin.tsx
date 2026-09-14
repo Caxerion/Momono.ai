@@ -1,16 +1,22 @@
 import { useCallback, useEffect, useState } from "react";
 import {
+  Activity,
   ArrowLeft,
   BarChart3,
   ExternalLink,
   FileWarning,
+  Hash,
   LayoutDashboard,
   Loader2,
+  MessageCircle,
   MessagesSquare,
   Shield,
+  TrendingDown,
+  TrendingUp,
   Trash2,
   Users,
 } from "lucide-react";
+import { navLink } from "../lib/link";
 
 type Props = {
   token: string | null;
@@ -26,6 +32,8 @@ type Stats = {
   conversations: number;
   messages: number;
   reports: number;
+  trend: { date: string; label: string; users: number; messages: number; conversations: number }[];
+  categories: { cat: string; n: number }[];
 };
 
 type AdminUser = {
@@ -180,7 +188,7 @@ export default function Admin({ token, tab, onChangeTab, onBack, onViewUser }: P
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-zinc-950">
       {/* Header */}
-      <header className="flex items-center gap-3 p-3 border-b border-zinc-200 dark:border-zinc-800">
+      {/* <header className="flex items-center gap-3 p-3 border-b border-zinc-200 dark:border-zinc-800">
         <button
           onClick={onBack}
           className="rounded-lg px-2 py-1 text-sm hover:bg-zinc-200 dark:hover:bg-zinc-800 focus:outline-none"
@@ -189,7 +197,7 @@ export default function Admin({ token, tab, onChangeTab, onBack, onViewUser }: P
           <ArrowLeft size={18} />
         </button>
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center">
             <Shield size={14} className="text-white" />
           </div>
           <div>
@@ -205,7 +213,7 @@ export default function Admin({ token, tab, onChangeTab, onBack, onViewUser }: P
         <span className="hidden sm:inline text-xs text-zinc-400">
           Halaman admin terpisah dari halaman user
         </span>
-      </header>
+      </header> */}
 
       {/* Tabs */}
       <nav className="flex gap-1.5 px-3 py-2 bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 overflow-x-auto">
@@ -215,7 +223,7 @@ export default function Admin({ token, tab, onChangeTab, onBack, onViewUser }: P
             onClick={() => setTab(t.key)}
             className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors shrink-0 ${
               tab === t.key
-                ? "bg-white dark:bg-zinc-800 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                ? "bg-white dark:bg-zinc-800 text-emerald-600 dark:text-emerald-400 shadow-sm"
                 : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
             }`}
           >
@@ -254,35 +262,240 @@ export default function Admin({ token, tab, onChangeTab, onBack, onViewUser }: P
   );
 }
 
-function Dashboard({ stats }: { stats: Stats | null }) {
-  if (!stats) return null;
-  const cards = [
-    { label: "Total Users", value: stats.users, icon: <Users size={18} /> },
-    { label: "Personas", value: stats.personas, icon: <BarChart3 size={18} /> },
-    { label: "Conversations", value: stats.conversations, icon: <MessagesSquare size={18} /> },
-    { label: "Messages", value: stats.messages, icon: <MessagesSquare size={18} /> },
-    { label: "Open Reports", value: stats.reports, icon: <FileWarning size={18} /> },
+function Panel({
+  title,
+  sub,
+  icon,
+  children,
+}: {
+  title: string;
+  sub?: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
+      <div className="flex items-center gap-2">
+        <span className="text-emerald-500">{icon}</span>
+        <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">{title}</h3>
+        {sub && <span className="ml-auto text-[11px] text-zinc-400">{sub}</span>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function trendDelta(series: number[]): number | null {
+  const recent = series.slice(-2).reduce((a, b) => a + b, 0);
+  const prev = series.slice(-4, -2).reduce((a, b) => a + b, 0);
+  if (prev <= 0) return null;
+  return Math.round(((recent - prev) / prev) * 100);
+}
+
+function BarTrend({ data }: { data: Stats["trend"] }) {
+  const max = Math.max(...data.map((d) => d.messages), 0);
+  const totalMsgs = data.reduce((s, d) => s + d.messages, 0);
+  const totalChats = data.reduce((s, d) => s + d.conversations, 0);
+  const totalUsers = data.reduce((s, d) => s + d.users, 0);
+  const gridLevels = [25, 50, 75];
+  return (
+    <div className="mt-4">
+      <div className="relative flex items-end justify-between gap-2 h-40">
+        {gridLevels.map((g) => (
+          <div
+            key={g}
+            className="absolute inset-x-0 border-t border-dashed border-zinc-200 dark:border-zinc-800"
+            style={{ bottom: `${g}%` }}
+          />
+        ))}
+        {data.map((p, i) => {
+          const h = max > 0 ? Math.max((p.messages / max) * 100, 3) : 0;
+          return (
+            <div key={i} className="relative flex-1 flex flex-col items-center justify-end h-full group">
+              {p.messages > 0 && (
+                <span className="mb-1 text-[10px] font-semibold text-zinc-400 dark:text-zinc-500">
+                  {p.messages}
+                </span>
+              )}
+              <div
+                className="w-full max-w-[26px] rounded-md bg-gradient-to-t from-emerald-500/80 to-green-500/80 group-hover:from-emerald-500 group-hover:to-green-500 transition-colors"
+                style={{ height: `${h}%` }}
+                title={`${p.label}: ${p.messages} pesan`}
+              />
+            </div>
+          );
+        })}
+      </div>
+      <div className="flex justify-between gap-2 mt-1.5">
+        {data.map((p, i) => (
+          <span key={i} className="flex-1 text-center text-[10px] uppercase tracking-wide text-zinc-400">
+            {p.label}
+          </span>
+        ))}
+      </div>
+      <div className="mt-3 pt-3 border-t border-zinc-100 dark:border-zinc-800 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-zinc-500 dark:text-zinc-400">
+        <span className="inline-flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+          {totalMsgs.toLocaleString()} pesan
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-teal-500" />
+          {totalChats.toLocaleString()} percakapan
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+          {totalUsers.toLocaleString()} user baru
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function CategoryList({ data }: { data: Stats["categories"] }) {
+  const total = data.reduce((s, c) => s + (c.n || 0), 0);
+  if (data.length === 0) {
+    return (
+      <p className="mt-6 text-sm text-zinc-400 text-center py-4">Belum ada kategori.</p>
+    );
+  }
+  const colors = [
+    "from-emerald-500 to-green-500",
+    "from-emerald-500 to-teal-400",
+    "from-amber-500 to-lime-400",
+    "from-teal-500 to-teal-400",
   ];
   return (
-    <div>
-      <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-3">
-        Ringkasan
-      </h2>
+    <div className="mt-4 space-y-3">
+      {data.map((c, i) => {
+        const pct = total > 0 ? Math.round((c.n / total) * 100) : 0;
+        const label = c.cat || "Uncategorized";
+        return (
+          <div key={`${c.cat}-${i}`}>
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-medium text-zinc-600 dark:text-zinc-300">
+                <span className="text-zinc-400">#</span>
+                {label}
+              </span>
+              <span className="text-zinc-500 dark:text-zinc-400">
+                {c.n} · {pct}%
+              </span>
+            </div>
+            <div className="mt-1 h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+              <div
+                className={`h-full rounded-full bg-gradient-to-r ${colors[i % colors.length]}`}
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function Dashboard({ stats }: { stats: Stats | null }) {
+  if (!stats) return null;
+
+  const trend = stats.trend ?? [];
+  const categories = stats.categories ?? [];
+
+  const cards = [
+    {
+      label: "Total Users",
+      value: stats.users,
+      icon: <Users size={16} />,
+      chip: "bg-emerald-500/10 text-emerald-500",
+      delta: trendDelta(trend.map((d) => d.users)),
+    },
+    {
+      label: "Personas",
+      value: stats.personas,
+      icon: <BarChart3 size={16} />,
+      chip: "bg-emerald-500/10 text-emerald-500",
+      delta: null,
+    },
+    {
+      label: "Conversations",
+      value: stats.conversations,
+      icon: <MessagesSquare size={16} />,
+      chip: "bg-teal-500/10 text-teal-500",
+      delta: trendDelta(trend.map((d) => d.conversations)),
+    },
+    {
+      label: "Messages",
+      value: stats.messages,
+      icon: <MessageCircle size={16} />,
+      chip: "bg-teal-500/10 text-teal-500",
+      delta: trendDelta(trend.map((d) => d.messages)),
+    },
+    {
+      label: "Open Reports",
+      value: stats.reports,
+      icon: <FileWarning size={16} />,
+      chip: "bg-amber-500/10 text-amber-500",
+      delta: null,
+    },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Ikhtisar</h2>
+        <p className="text-xs text-zinc-400 mt-0.5">
+          Ringkasan aktivitas dan pertumbuhan platform Momono.
+        </p>
+      </div>
+
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
         {cards.map((c) => (
           <div
             key={c.label}
-            className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 p-4"
+            className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm"
           >
-            <div className="flex items-center gap-2 text-zinc-400">
-              {c.icon}
-              <span className="text-xs font-medium">{c.label}</span>
+            <div className="flex items-start justify-between">
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${c.chip}`}>
+                {c.icon}
+              </div>
+              {c.delta != null && (
+                <span
+                  className={`inline-flex items-center gap-0.5 text-[11px] font-semibold ${
+                    c.delta >= 0
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : "text-red-600 dark:text-red-400"
+                  }`}
+                  title="Perbandingan 4 hari terakhir vs 4 hari sebelumnya"
+                >
+                  {c.delta >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                  {c.delta >= 0 ? "+" : ""}
+                  {c.delta}%
+                </span>
+              )}
             </div>
-            <p className="mt-2 text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+            <p className="mt-3 text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
               {c.value.toLocaleString()}
             </p>
+            <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">{c.label}</p>
           </div>
         ))}
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <Panel
+            title="Aktivitas 7 hari terakhir"
+            sub="Pesan per hari"
+            icon={<Activity size={15} />}
+          >
+            <BarTrend data={trend} />
+          </Panel>
+        </div>
+        <Panel
+          title="Kategori teratas"
+          sub="Top personas"
+          icon={<Hash size={15} />}
+        >
+          <CategoryList data={categories} />
+        </Panel>
       </div>
     </div>
   );
@@ -310,9 +523,9 @@ function Table({ headers, children }: { headers: string[]; children: React.React
 function ViewUserButton({ userId, onViewUser }: { userId: string; onViewUser: (id: string) => void }) {
   return (
     <button
-      onClick={() => onViewUser(userId)}
+      {...navLink(`#/user/${userId}`, () => onViewUser(userId))}
       title="Lihat profil user"
-      className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 focus:outline-none"
+      className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 focus:outline-none"
     >
       <ExternalLink size={14} />
     </button>
@@ -367,7 +580,7 @@ function UsersTable({
           <td className="px-3 py-2 text-zinc-500">{fmtDate(u.created_at)}</td>
           <td className="px-3 py-2">
             {u.is_admin ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 text-[11px] font-medium">
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 text-[11px] font-medium">
                 <Shield size={11} /> Admin
               </span>
             ) : (
@@ -455,7 +668,7 @@ function ReportsTable({
         <tr key={`${r.reporter_id}-${r.reported_id}`} className="hover:bg-zinc-50 dark:hover:bg-zinc-900">
           <td className="px-3 py-2">
             <button
-              onClick={() => onViewUser(r.reporter_id)}
+              {...navLink(`#/user/${r.reporter_id}`, () => onViewUser(r.reporter_id))}
               className="font-medium text-zinc-900 dark:text-zinc-100 hover:underline"
             >
               @{r.reporter_name}
@@ -463,7 +676,7 @@ function ReportsTable({
           </td>
           <td className="px-3 py-2">
             <button
-              onClick={() => onViewUser(r.reported_id)}
+              {...navLink(`#/user/${r.reported_id}`, () => onViewUser(r.reported_id))}
               className="font-medium text-zinc-900 dark:text-zinc-100 hover:underline"
             >
               @{r.reported_name}
@@ -492,7 +705,7 @@ function ConversationsTable({
   onViewUser: (id: string) => void;
 }) {
   return (
-    <Table headers={["Judul", "Karakter", "User", "Terakhir update", ""]}>
+    <Table headers={["Chat Title", "Character", "User", "Last Updated", ""]}>
       {conversations.length === 0 && (
         <tr>
           <td colSpan={5} className="px-3 py-8 text-center text-zinc-400">

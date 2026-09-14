@@ -16,9 +16,11 @@ import {
   User,
   LogOut,
   Shield,
+  WandSparkles,
 } from "lucide-react";
 import Avatar from "./Avatar";
 import type { Conversation, Persona, UserProfile } from "../types";
+import { navLink } from "../lib/link";
 
 type Props = {
   conversations: Conversation[];
@@ -87,14 +89,14 @@ export default function Sidebar(p: Props) {
             key={ps.id}
             onClick={() => p.onSelectPersona(ps.id)}
             title={ps.name}
-            className={`relative flex items-center justify-center w-10 h-10 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 ${
+            className={`relative flex items-center justify-center w-10 h-10 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
               isActive
-                ? "bg-indigo-100 dark:bg-indigo-900/50"
+                ? "bg-emerald-100 dark:bg-emerald-900/50"
                 : "hover:bg-zinc-200/70 dark:hover:bg-zinc-800"
             }`}
           >
             {isActive && (
-              <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-indigo-500" />
+              <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-emerald-500" />
             )}
             <Avatar name={ps.name} size={28} src={ps.avatar_url} />
           </button>
@@ -114,15 +116,15 @@ export default function Sidebar(p: Props) {
             isMenuOpen ? "z-20" : "z-0"
           } ${
             isActive
-              ? "bg-indigo-100 dark:bg-indigo-900/50"
+              ? "bg-emerald-100 dark:bg-emerald-900/50"
               : "hover:bg-zinc-200/70 dark:hover:bg-zinc-800"
           }`}
         >
           {isActive && (
-            <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-indigo-500" />
+            <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-emerald-500" />
           )}
           <button
-            onClick={() => p.onSelectPersona(ps.id)}
+            {...navLink(`#/chat/${ps.id}`, () => p.onSelectPersona(ps.id))}
             className="flex items-center gap-2.5 flex-1 min-w-0 px-2.5 py-2 focus:outline-none"
           >
             <Avatar name={ps.name} size={30} src={ps.avatar_url} />
@@ -130,14 +132,14 @@ export default function Sidebar(p: Props) {
               <span
                 className={`block truncate text-sm ${
                   isActive
-                    ? "font-semibold text-indigo-700 dark:text-indigo-300"
+                    ? "font-semibold text-emerald-700 dark:text-emerald-300"
                     : "text-zinc-700 dark:text-zinc-300"
                 }`}
               >
                 {ps.name}
               </span>
               {created ? (
-                <span className="block truncate text-xs text-indigo-400">Your creation</span>
+                <span className="block truncate text-xs text-emerald-400">Your creation</span>
               ) : (
                 ps.title && (
                   <span className="block truncate text-xs text-zinc-400">{ps.title}</span>
@@ -145,7 +147,7 @@ export default function Sidebar(p: Props) {
               )}
             </div>
             {!hasChats && (
-              <span className="ml-auto shrink-0 text-[10px] font-medium text-indigo-500 bg-indigo-500/10 px-1.5 py-0.5 rounded-full">
+              <span className="ml-auto shrink-0 text-[10px] font-medium text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded-full">
                 new
               </span>
             )}
@@ -163,7 +165,7 @@ export default function Sidebar(p: Props) {
                   setMenuPos({ top: rect.bottom + 4, left: rect.right - 176 });
                 }
               }}
-              className={`p-1.5 rounded-md text-zinc-400 hover:bg-zinc-300/70 dark:hover:bg-zinc-700 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 ${
+              className={`p-1.5 rounded-md text-zinc-400 hover:bg-zinc-300/70 dark:hover:bg-zinc-700 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
                 isMenuOpen ? "opacity-100 bg-zinc-300/70 dark:bg-zinc-700" : "opacity-0 group-hover:opacity-100"
               }`}
             >
@@ -185,7 +187,7 @@ export default function Sidebar(p: Props) {
       <button
         onClick={() => setCollapsed(!collapsed)}
         title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        className="absolute -right-3 top-6 z-30 w-6 h-6 rounded-full border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 shadow-sm flex items-center justify-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+        className="absolute -right-3 top-6 z-30 w-6 h-6 rounded-full border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 shadow-sm flex items-center justify-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
       >
         {collapsed ? <PanelLeftOpen size={13} /> : <PanelLeftClose size={13} />}
       </button>
@@ -196,7 +198,7 @@ export default function Sidebar(p: Props) {
           collapsed ? "justify-center px-0" : "px-4"
         }`}
       >
-        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center shrink-0">
+        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center shrink-0">
           <Sparkles size={15} className="text-white" strokeWidth={2.5} />
         </div>
         {!collapsed && (
@@ -209,9 +211,9 @@ export default function Sidebar(p: Props) {
       {/* Primary nav */}
       <nav className={`flex flex-col gap-0.5 ${collapsed ? "px-2 items-center" : "px-2"}`}>
         <button
-          onClick={p.onOpenDiscover}
+          {...navLink("#/discover", p.onOpenDiscover)}
           title="Discover"
-          className={`flex items-center gap-3 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200/70 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 ${
+          className={`flex items-center gap-3 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200/70 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
             collapsed ? "justify-center w-10 h-10" : "w-full px-2.5 py-2"
           }`}
         >
@@ -219,20 +221,20 @@ export default function Sidebar(p: Props) {
           {!collapsed && "Discover"}
         </button>
         <button
-          onClick={p.onOpenGenerate}
+          {...navLink("#/generate", p.onOpenGenerate)}
           title="Generate"
-          className={`flex items-center gap-3 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200/70 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 ${
+          className={`flex items-center gap-3 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200/70 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
             collapsed ? "justify-center w-10 h-10" : "w-full px-2.5 py-2"
           }`}
         >
-          <Image size={17} strokeWidth={2} />
+          <WandSparkles size={17} strokeWidth={2} />
           {!collapsed && "Generate"}
         </button>
         {p.isAdmin && (
           <button
-            onClick={p.onOpenAdmin}
+            {...navLink("#/admin", p.onOpenAdmin)}
             title="Admin Panel"
-            className={`flex items-center gap-3 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200/70 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 ${
+            className={`flex items-center gap-3 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200/70 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
               collapsed ? "justify-center w-10 h-10" : "w-full px-2.5 py-2"
             }`}
           >
@@ -241,9 +243,9 @@ export default function Sidebar(p: Props) {
           </button>
         )}
         <button
-          onClick={p.onNewPersona}
+          {...navLink("#/create", p.onNewPersona)}
           title="Create Character"
-          className={`flex items-center gap-3 rounded-lg text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 ${
+          className={`flex items-center gap-3 rounded-lg text-sm font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
             collapsed ? "justify-center w-10 h-10" : "w-full px-2.5 py-2"
           }`}
         >
@@ -263,8 +265,8 @@ export default function Sidebar(p: Props) {
               className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none"
             />
             <input
-              className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 pl-8 pr-3 py-1.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:border-indigo-500 transition-shadow"
-              placeholder="Search characters..."
+              className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 pl-8 pr-3 py-1.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500 transition-shadow"
+              placeholder="Search saved characters..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -287,7 +289,7 @@ export default function Sidebar(p: Props) {
         {!collapsed && (
           <button
             onClick={() => setChatsOpen(!chatsOpen)}
-            className="flex items-center gap-1.5 w-full px-2.5 py-2 rounded-lg text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200/70 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+            className="flex items-center gap-1.5 w-full px-2.5 py-2 rounded-lg text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200/70 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
           >
             <ChevronRight
               size={13}
@@ -328,7 +330,7 @@ export default function Sidebar(p: Props) {
         {!collapsed && (
           <button
             onClick={() => setCreatedOpen(!createdOpen)}
-            className="flex items-center gap-1.5 w-full px-2.5 py-2 mt-1 rounded-lg text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200/70 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+            className="flex items-center gap-1.5 w-full px-2.5 py-2 mt-1 rounded-lg text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200/70 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
           >
             <ChevronRight
               size={13}
@@ -379,7 +381,7 @@ export default function Sidebar(p: Props) {
             <button
               onClick={() => setMoreMenu((v) => !v)}
               title={p.userProfile.display_name || p.userProfile.username}
-              className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-zinc-200/70 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+              className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-zinc-200/70 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
             >
               <Avatar name={p.userProfile.username} size={32} src={p.userProfile.avatar_url} />
             </button>
@@ -401,7 +403,7 @@ export default function Sidebar(p: Props) {
                 <Avatar name={p.userProfile.username} size={36} src={p.userProfile.avatar_url} />
               </button>
               <button
-                onClick={p.onOpenProfile}
+                {...navLink("#/me", p.onOpenProfile)}
                 className="min-w-0 flex-1 text-left px-2 py-2 focus:outline-none"
               >
                 <p className="text-sm font-semibold truncate text-zinc-900 dark:text-zinc-100">
@@ -411,7 +413,7 @@ export default function Sidebar(p: Props) {
               </button>
               <button
                 onClick={() => setMoreMenu((v) => !v)}
-                className="shrink-0 p-2 mr-1 rounded-md text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+                className="shrink-0 p-2 mr-1 rounded-md text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
               >
                 <Settings size={16} />
               </button>

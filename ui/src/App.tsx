@@ -650,6 +650,12 @@ export default function App() {
           <Discover
             personas={allPersonas}
             favorites={favoriteIds}
+            userProfile={userProfile}
+            dark={dark}
+            onToggleDark={() => setDark(!dark)}
+            onOpenProfile={() => navigate({ path: "me" })}
+            onOpenSettings={() => setSettingsOpen(true)}
+            onLogout={handleLogout}
             onChat={(pid) => handleSelectPersona(pid)}
             onToggleFavorite={handleToggleFavorite}
             onViewUser={handleViewUser}
@@ -676,34 +682,6 @@ export default function App() {
         ) : route.path === "chat" && currentPersona ? (
           <div className="flex-1 flex min-h-0">
             <div className="flex-1 flex flex-col min-h-0 min-w-0">
-              <div className="flex items-center p-2 border-b border-zinc-200 dark:border-zinc-800 gap-2">
-                <button
-                  onClick={handleBackToDefault}
-                  className="rounded-lg px-2 py-1 text-sm hover:bg-zinc-200 dark:hover:bg-zinc-800"
-                >
-                  ←
-                </button>
-                <button
-                  onClick={() => navigate({ path: "profile", personaId: currentPersona.id })}
-                  className="font-semibold text-sm truncate hover:underline"
-                >
-                  {currentPersona.name}
-                </button>
-                <div className="flex-1" />
-                <button
-                  className="rounded-lg px-3 py-1 text-sm bg-zinc-200 dark:bg-zinc-800"
-                  onClick={() => setDark(!dark)}
-                >
-                  {dark ? "☀️" : "🌙"}
-                </button>
-                <button
-                  className="rounded-lg px-3 py-1 text-sm bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400"
-                  onClick={handleLogout}
-                >
-                  Logout
-                </button>
-              </div>
-              <div className="flex-1 flex flex-col min-h-0 relative">
                 <ChatArea
                   persona={currentPersona}
                   messages={messages}
@@ -717,20 +695,17 @@ export default function App() {
                   busy={busy}
                   userProfile={userProfile}
                   onViewUser={handleViewUser}
+                  onBack={handleBackToDefault}
+                  onOpenProfile={() => navigate({ path: "me" })}
+                  onOpenPersonaProfile={() => navigate({ path: "profile", personaId: currentPersona.id })}
+                  onToggleSidebar={() => setShowCharacterSidebar(!showCharacterSidebar)}
+                  sidebarOpen={showCharacterSidebar}
+                  dark={dark}
+                  onToggleDark={() => setDark(!dark)}
+                  onOpenSettings={() => setSettingsOpen(true)}
+                  onLogout={handleLogout}
                 />
-                <button
-                  onClick={() => setShowCharacterSidebar(!showCharacterSidebar)}
-                  className="absolute right-3 top-3 z-20 w-9 h-9 flex items-center justify-center rounded-lg bg-white/80 dark:bg-zinc-800/80 backdrop-blur border border-zinc-200 dark:border-zinc-700 shadow-sm hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
-                  title="Info"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="3" y1="6" x2="21" y2="6" />
-                    <line x1="3" y1="12" x2="21" y2="12" />
-                    <line x1="3" y1="18" x2="21" y2="18" />
-                  </svg>
-                </button>
               </div>
-            </div>
             <CharacterSidebar
               persona={currentPersona}
               conversations={conversations}
@@ -745,20 +720,6 @@ export default function App() {
           </div>
         ) : (
           <>
-            <div className="flex items-center justify-end p-2 border-b border-zinc-200 dark:border-zinc-800 gap-2">
-              <button
-                className="rounded-lg px-3 py-1 text-sm bg-zinc-200 dark:bg-zinc-800"
-                onClick={() => setDark(!dark)}
-              >
-                {dark ? "☀️ Light" : "🌙 Dark"}
-              </button>
-              <button
-                className="rounded-lg px-3 py-1 text-sm bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400"
-                onClick={handleLogout}
-              >
-                Logout
-              </button>
-            </div>
             <ChatArea
               persona={currentPersona}
               messages={messages}
@@ -771,6 +732,17 @@ export default function App() {
               onNextRegen={nextRegen}
               busy={busy}
               userProfile={userProfile}
+              onBack={handleBackToDefault}
+              onOpenProfile={() => navigate({ path: "me" })}
+              onOpenPersonaProfile={() =>
+                currentPersona && navigate({ path: "profile", personaId: currentPersona.id })
+              }
+              onToggleSidebar={() => setShowCharacterSidebar(!showCharacterSidebar)}
+              sidebarOpen={showCharacterSidebar}
+              dark={dark}
+              onToggleDark={() => setDark(!dark)}
+              onOpenSettings={() => setSettingsOpen(true)}
+              onLogout={handleLogout}
             />
           </>
         )}

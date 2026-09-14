@@ -43,14 +43,14 @@ export default function AdminNavbar({
 
         {/* Brand */}
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose-600 to-orange-500 shadow-md shadow-rose-500/25 flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-600 to-lime-500 shadow-md shadow-emerald-500/25 flex items-center justify-center shrink-0">
             <ShieldCheck size={15} className="text-white" />
           </div>
           <div className="min-w-0 leading-tight">
             <p className="text-sm font-bold tracking-tight text-zinc-900 dark:text-zinc-100 truncate">
               Admin Panel
             </p>
-            <p className="text-[10px] uppercase tracking-widest text-rose-500 dark:text-rose-400 font-semibold">
+            <p className="text-[10px] uppercase tracking-widest text-emerald-500 dark:text-emerald-400 font-semibold">
               Momono Control Room
             </p>
           </div>
@@ -65,14 +65,14 @@ export default function AdminNavbar({
           className="relative rounded-lg p-2 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:outline-none"
         >
           <Bell size={18} />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-zinc-950" />
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-zinc-950" />
         </button>
 
         {/* Avatar menu */}
         <div className="relative" ref={menuRef}>
           <button
             onClick={toggleMenu}
-            className="flex items-center gap-2 rounded-full pl-1 pr-1 py-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 transition-colors"
+            className="flex items-center gap-2 rounded-full pl-1 pr-1 py-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 transition-colors"
           >
             <Avatar
               name={userProfile?.username ?? "Admin"}

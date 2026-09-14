@@ -110,7 +110,7 @@ export default function PersonaModal({ persona, token, onClose, onSaved }: Props
               Batal
             </button>
             <button
-              className="px-3 py-1 rounded bg-indigo-600 text-white disabled:opacity-50"
+              className="px-3 py-1 rounded bg-emerald-600 text-white disabled:opacity-50"
               disabled={busy || !name}
               onClick={save}
             >

@@ -9,6 +9,7 @@ import {
   Check,
 } from "lucide-react";
 import type { Persona } from "../types";
+import { navLink } from "../lib/link";
 
 type Props = {
   persona: Persona;
@@ -29,7 +30,7 @@ type Props = {
 function SquareAvatar({ name, src, size = 112 }: { name: string; src?: string; size?: number }) {
   return (
     <div
-      className="rounded-2xl overflow-hidden shrink-0 bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500 flex items-center justify-center text-white font-bold"
+      className="rounded-2xl overflow-hidden shrink-0 bg-gradient-to-br from-emerald-500 via-teal-500 to-green-500 flex items-center justify-center text-white font-bold"
       style={{ width: size, height: size }}
     >
       {src ? (
@@ -63,7 +64,7 @@ function Section({ label, children, italic }: { label: string; children: string;
         {isLong && (
           <button
             onClick={() => setExpanded((v) => !v)}
-            className="mt-2 text-sm font-semibold text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-300"
+            className="mt-2 text-sm font-semibold text-emerald-500 dark:text-emerald-400 hover:text-emerald-600 dark:hover:text-emerald-300"
           >
             {expanded ? "Read Less" : "Read More"}
           </button>
@@ -200,7 +201,7 @@ export default function CharacterProfile({
                   <button
                     onClick={() => onEdit(persona)}
                     title="Edit Character"
-                    className="shrink-0 p-1.5 rounded-md text-zinc-400 hover:text-indigo-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                    className="shrink-0 p-1.5 rounded-md text-zinc-400 hover:text-emerald-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                   >
                     <Pencil size={15} />
                   </button>
@@ -208,11 +209,13 @@ export default function CharacterProfile({
               </div>
               {persona.created_by && (
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (persona.user_id) onViewUser?.(persona.user_id);
-                  }}
-                  className="text-sm font-medium text-indigo-500 dark:text-indigo-400 mt-0.5 truncate hover:underline"
+                  {...navLink(
+                    persona.user_id ? `#/user/${persona.user_id}` : "#/",
+                    () => {
+                      if (persona.user_id) onViewUser?.(persona.user_id);
+                    }
+                  )}
+                  className="text-sm font-medium text-emerald-500 dark:text-emerald-400 mt-0.5 truncate hover:underline"
                 >
                   @{persona.created_by}
                 </button>
@@ -250,8 +253,8 @@ export default function CharacterProfile({
           {/* Actions: Chat, Favorit, Bagikan — Edit Character sudah ada di samping nama */}
           <div className="flex items-center gap-3 mt-5">
             <button
-              onClick={() => onChat(persona.id)}
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 transition-colors text-white rounded-xl px-5 py-2.5 text-sm font-semibold"
+              {...navLink(`#/chat/${persona.id}`, () => onChat(persona.id))}
+              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 transition-colors text-white rounded-xl px-5 py-2.5 text-sm font-semibold"
             >
               <MessageSquare size={16} />
               Start Chatting
@@ -260,7 +263,7 @@ export default function CharacterProfile({
               onClick={handleFavorite}
               className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
                 favorited
-                  ? "text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40"
+                  ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40"
                   : "text-zinc-700 dark:text-zinc-200 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700"
               }`}
             >
@@ -282,7 +285,7 @@ export default function CharacterProfile({
               {tags.map((tag) => (
                 <span
                   key={tag}
-                  className="px-3.5 py-1.5 rounded-full text-sm font-medium bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 whitespace-nowrap"
+                  className="px-3.5 py-1.5 rounded-full text-sm font-medium bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 whitespace-nowrap"
                 >
                   {tag}
                 </span>

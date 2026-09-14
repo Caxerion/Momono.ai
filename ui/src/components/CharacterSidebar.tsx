@@ -15,6 +15,7 @@ import {
   ImageIcon,
 } from "lucide-react";
 import type { Conversation, Persona, PersonaReactions } from "../types";
+import { navLink } from "../lib/link";
 
 type Props = {
   persona: Persona;
@@ -163,6 +164,9 @@ export default function CharacterSidebar({
             onClick={() => onViewProfile(persona)}
             role="button"
             tabIndex={0}
+            onAuxClick={(e) => {
+              if (e.button === 1) window.open(`#/profile/${persona.id}`, "_blank", "noopener,noreferrer");
+            }}
             className="relative w-full h-52 shrink-0 overflow-hidden group cursor-pointer"
           >
             {showAvatarImage ? (
@@ -173,7 +177,7 @@ export default function CharacterSidebar({
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-indigo-600 via-violet-700 to-fuchsia-800 flex items-center justify-center">
+              <div className="w-full h-full bg-gradient-to-br from-emerald-600 via-teal-700 to-green-800 flex items-center justify-center">
                 <ImageIcon size={56} className="text-white/25" strokeWidth={1.5} />
               </div>
             )}
@@ -193,7 +197,17 @@ export default function CharacterSidebar({
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (persona.user_id) onViewUser?.(persona.user_id);
+                        if (e.ctrlKey || e.metaKey) {
+                          if (persona.user_id)
+                            window.open(`#/user/${persona.user_id}`, "_blank", "noopener,noreferrer");
+                        } else if (persona.user_id) {
+                          onViewUser?.(persona.user_id);
+                        }
+                      }}
+                      onAuxClick={(e) => {
+                        e.stopPropagation();
+                        if (e.button === 1 && persona.user_id)
+                          window.open(`#/user/${persona.user_id}`, "_blank", "noopener,noreferrer");
                       }}
                       className="truncate font-medium text-white/90 hover:underline"
                     >
@@ -216,7 +230,7 @@ export default function CharacterSidebar({
                 {visibleCategories.map((cat) => (
                   <span
                     key={cat}
-                    className="px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300"
+                    className="px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
                   >
                     {cat}
                   </span>
@@ -225,7 +239,7 @@ export default function CharacterSidebar({
               {hasMore && (
                 <button
                   onClick={() => setShowAllCategories(!showAllCategories)}
-                  className="mt-2 flex items-center gap-1 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+                  className="mt-2 flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
                 >
                   {showAllCategories ? (
                     <>
@@ -298,7 +312,7 @@ export default function CharacterSidebar({
                 <span>{copied ? "Copied!" : "Share"}</span>
               </button>
               <button
-                onClick={() => onViewProfile(persona)}
+                {...navLink(`#/profile/${persona.id}`, () => onViewProfile(persona))}
                 className="flex flex-col items-center gap-1 p-2 rounded-lg text-xs font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
               >
                 <Eye size={16} />
@@ -325,7 +339,7 @@ export default function CharacterSidebar({
                     onClick={() => onSelectConversation(c.id)}
                     className={`w-full text-left px-3 py-2 rounded-lg text-sm truncate transition-colors ${
                       conversationId === c.id
-                        ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 font-medium"
+                        ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-medium"
                         : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800"
                     }`}
                   >
@@ -376,7 +390,7 @@ export default function CharacterSidebar({
                   setShowConfirm(false);
                   doToggleFavorite(false);
                 }}
-                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
               >
                 Remove
               </button>

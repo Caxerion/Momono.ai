@@ -171,7 +171,7 @@ export default function Settings({ profile, token, onBack, onSaved }: Props) {
             Cancel
           </button>
           <button
-            className="px-5 py-2.5 rounded-lg text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
+            className="px-5 py-2.5 rounded-lg text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
             disabled={busy || uploading || !username}
             onClick={save}
           >

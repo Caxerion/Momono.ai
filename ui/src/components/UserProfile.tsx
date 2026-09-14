@@ -74,13 +74,13 @@ function PersonaCard({
             onEdit?.();
           }}
           title="Edit Character"
-          className="absolute top-3 right-3 z-10 rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+          className="absolute top-3 right-3 z-10 rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors"
         >
           <MoreHorizontal size={16} />
         </button>
       )}
       <button onClick={onClick} className="w-full p-4 flex items-start gap-4 text-left">
-        <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500 flex items-center justify-center text-white font-bold text-xl">
+        <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 bg-gradient-to-br from-emerald-500 via-teal-500 to-green-500 flex items-center justify-center text-white font-bold text-xl">
           {persona.avatar_url ? (
             <img
               src={persona.avatar_url}
@@ -102,7 +102,7 @@ function PersonaCard({
                 e.stopPropagation();
                 if (persona.user_id) onViewUser?.(persona.user_id);
               }}
-              className="text-xs font-medium text-indigo-500 dark:text-indigo-400 truncate mt-0.5 hover:underline"
+              className="text-xs font-medium text-emerald-500 dark:text-emerald-400 truncate mt-0.5 hover:underline"
             >
               @{persona.created_by}
             </button>
@@ -117,7 +117,7 @@ function PersonaCard({
               {visibleCategories.map((cat) => (
                 <span
                   key={cat}
-                  className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 whitespace-nowrap"
+                  className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 whitespace-nowrap"
                 >
                   {cat}
                 </span>
@@ -380,7 +380,7 @@ export default function UserProfilePage({
                           setEditing(true);
                         }}
                         title="Edit Profile"
-                        className="shrink-0 p-1.5 rounded-md text-zinc-400 hover:text-indigo-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                        className="shrink-0 p-1.5 rounded-md text-zinc-400 hover:text-emerald-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                       >
                         <Pencil size={15} />
                       </button>
@@ -399,13 +399,13 @@ export default function UserProfilePage({
                           }
                         }}
                         title="More actions"
-                        className="shrink-0 p-1.5 rounded-md text-zinc-400 hover:text-indigo-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus:outline-none"
+                        className="shrink-0 p-1.5 rounded-md text-zinc-400 hover:text-emerald-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus:outline-none"
                       >
                         <MoreHorizontal size={18} />
                       </button>
                     )}
                   </div>
-                  <p className="text-sm font-medium text-indigo-500 dark:text-indigo-400 mt-1">
+                  <p className="text-sm font-medium text-emerald-500 dark:text-emerald-400 mt-1">
                     @{profile.username}
                   </p>
 
@@ -456,7 +456,7 @@ export default function UserProfilePage({
                     onClick={() => setTab("created")}
                     className={`px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors ${
                       tab === "created"
-                        ? "border-indigo-500 text-indigo-600 dark:text-indigo-400"
+                        ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
                         : "border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
                     }`}
                   >
@@ -466,7 +466,7 @@ export default function UserProfilePage({
                     onClick={() => setTab("favorites")}
                     className={`px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors ${
                       tab === "favorites"
-                        ? "border-indigo-500 text-indigo-600 dark:text-indigo-400"
+                        ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
                         : "border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
                     }`}
                   >
@@ -579,7 +579,7 @@ export default function UserProfilePage({
                   Cancel
                 </button>
                 <button
-                  className="px-5 py-2.5 rounded-lg text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-lg text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
                   disabled={busy || uploading || !username}
                   onClick={save}
                 >

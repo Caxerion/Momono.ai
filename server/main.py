@@ -1,8 +1,9 @@
 import hashlib
 import logging
 import os
+import random
 import uuid
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 import httpx
@@ -41,6 +42,51 @@ def resolve_user_vars(text: str, user_name: str) -> str:
 
 def now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+RANK_WEIGHTS = {
+    # MVP defaults; akan di-"knob" dari panel admin nanti.
+    "likes": 3.0,   # tiap like menuai 3 poin
+    "chats": 2.0,   # tiap percakapan 2 poin
+    "reacts": 1.0,  # setiap reaksi (like+dislike) 1 poin
+    "age": 0.02,    # penalti per hari umur persona
+    "jitter": 0.6,  # rotasi acak harian (tetap < bobot 1 like)
+}
+
+
+def _age_days(created_at: str) -> float:
+    try:
+        d = datetime.fromisoformat(str(created_at))
+    except (ValueError, TypeError):
+        return 0.0
+    return max((datetime.now(timezone.utc).replace(tzinfo=None) - d.replace(tzinfo=None)).total_seconds() / 86400, 0.0)
+
+
+def rank_discover(items: list[dict], seed_key: str) -> list[dict]:
+    """Ranking Discover: engagement + recency + jitter yang di-seed per user per tanggal.
+
+    Seed = hash(user_id + tanggal) => urutan stabil dalam sehari,
+    tapi berotasi tiap hari baru. Jitter dibatasi < bobot 1 like supaya
+    persona populer tetap di atas, sisanya yang lebar bucket-nya ikut shuffle.
+    """
+    seed = int(hashlib.md5(f"{seed_key}:{date.today().isoformat()}".encode()).hexdigest(), 16) % (2**32)
+    rng = random.Random(seed)
+    jitter = {p["id"]: rng.uniform(0, 1) for p in items}
+    w = RANK_WEIGHTS
+
+    def score(p: dict) -> float:
+        likes = p.get("likes") or 0
+        dislikes = p.get("dislikes") or 0
+        chats = p.get("chat_count") or 0
+        return (
+            w["likes"] * likes
+            + w["chats"] * chats
+            + w["reacts"] * (likes + dislikes)
+            - w["age"] * _age_days(p.get("created_at"))
+            + w["jitter"] * jitter[p["id"]]
+        )
+
+    return sorted(items, key=score, reverse=True)
 
 
 @app.on_event("startup")
@@ -225,9 +271,17 @@ def list_personas(req: Request, mine: bool = False, user_id: int | None = None):
             ).fetchall()
         else:
             rows = conn.execute(
-                "SELECT * FROM personas ORDER BY created_at DESC"
+                """
+                SELECT p.*, COUNT(c.id) AS chat_count
+                FROM personas p
+                LEFT JOIN conversations c ON c.persona_id = p.id
+                GROUP BY p.id
+                """
             ).fetchall()
-    return [dict(r) for r in rows]
+        items = [dict(r) for r in rows]
+        if not mine and user_id is None:
+            items = rank_discover(items, seed_key=user_id_current)
+    return items
 
 
 @app.get("/api/personas/{pid}")

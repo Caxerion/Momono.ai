@@ -39,18 +39,18 @@ function WelcomeModal({ isOpen, onComplete }: WelcomeModalProps) {
       <div className="absolute inset-0 bg-[#050208]/80 backdrop-blur-sm" />
 
       {/* Ambient glow blobs */}
-      <div className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-indigo-500/20 blur-[100px]" />
+      <div className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-emerald-500/20 blur-[100px]" />
       <div className="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-pink-500/20 blur-[100px]" />
 
       {/* Card */}
       <div className="relative w-full max-w-md overflow-hidden rounded-3xl border border-white/10 bg-[#12081f]/90 shadow-[0_0_60px_-15px_rgba(139,92,246,0.4)] backdrop-blur-2xl">
         {/* Top accent bar */}
-        <div className="h-1.5 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
+        <div className="h-1.5 w-full bg-gradient-to-r from-emerald-500 via-purple-500 to-pink-500" />
 
         <div className="px-7 pt-8 pb-7 sm:px-9">
           {/* Header */}
           <div className="mb-7 flex flex-col items-center text-center">
-            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-pink-500 shadow-lg shadow-purple-500/30">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-pink-500 shadow-lg shadow-purple-500/30">
               <Sparkles className="h-7 w-7 text-white" strokeWidth={2} />
             </div>
             <h2 className="text-xl font-bold text-white sm:text-2xl">
@@ -77,7 +77,7 @@ function WelcomeModal({ isOpen, onComplete }: WelcomeModalProps) {
                 onChange={(e) => setDisplayName(e.target.value)}
                 maxLength={24}
                 placeholder="Enter your display name..."
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 text-white placeholder-white/30 outline-none transition-all focus:border-indigo-400/60 focus:bg-white/[0.07] focus:ring-4 focus:ring-indigo-500/15"
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 text-white placeholder-white/30 outline-none transition-all focus:border-emerald-400/60 focus:bg-white/[0.07] focus:ring-4 focus:ring-emerald-500/15"
               />
               <span className="pointer-events-none absolute bottom-2 right-3 text-[11px] text-white/25">
                 {displayName.length}/24
@@ -100,13 +100,13 @@ function WelcomeModal({ isOpen, onComplete }: WelcomeModalProps) {
                 className={[
                   'group relative flex flex-col items-center gap-2.5 rounded-2xl border px-3 py-4 transition-all duration-200',
                   genderOption === 'male'
-                    ? 'border-sky-400/60 bg-white/[0.06] shadow-lg shadow-sky-500/20'
+                    ? 'border-teal-400/60 bg-white/[0.06] shadow-lg shadow-teal-500/20'
                     : 'border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]',
                 ].join(' ')}
               >
                 <div
                   className={[
-                    'flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-indigo-500 transition-transform duration-200',
+                    'flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-emerald-500 transition-transform duration-200',
                     genderOption === 'male' ? 'scale-105' : 'scale-100 opacity-80 group-hover:opacity-100',
                   ].join(' ')}
                 >
@@ -119,13 +119,13 @@ function WelcomeModal({ isOpen, onComplete }: WelcomeModalProps) {
                 <span
                   className={[
                     'flex h-4.5 w-4.5 items-center justify-center rounded-full border-2 transition-colors',
-                    genderOption === 'male' ? 'border-sky-400/60' : 'border-white/20',
+                    genderOption === 'male' ? 'border-teal-400/60' : 'border-white/20',
                   ].join(' ')}
                 >
                   <span
                     className={[
                       'h-2 w-2 rounded-full transition-all duration-200',
-                      genderOption === 'male' ? 'bg-sky-400 scale-100 opacity-100' : 'scale-0 opacity-0',
+                      genderOption === 'male' ? 'bg-teal-400 scale-100 opacity-100' : 'scale-0 opacity-0',
                     ].join(' ')}
                   />
                 </span>
@@ -144,7 +144,7 @@ function WelcomeModal({ isOpen, onComplete }: WelcomeModalProps) {
               >
                 <div
                   className={[
-                    'flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-rose-500 transition-transform duration-200',
+                    'flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-emerald-500 transition-transform duration-200',
                     genderOption === 'female' ? 'scale-105' : 'scale-100 opacity-80 group-hover:opacity-100',
                   ].join(' ')}
                 >
@@ -182,7 +182,7 @@ function WelcomeModal({ isOpen, onComplete }: WelcomeModalProps) {
               >
                 <div
                   className={[
-                    'flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-violet-500 transition-transform duration-200',
+                    'flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-teal-500 transition-transform duration-200',
                     genderOption === 'custom' ? 'scale-105' : 'scale-100 opacity-80 group-hover:opacity-100',
                   ].join(' ')}
                 >
@@ -239,7 +239,7 @@ function WelcomeModal({ isOpen, onComplete }: WelcomeModalProps) {
           <button
             onClick={handleSubmit}
             disabled={!isValid || isSubmitting}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 py-3.5 font-semibold text-white transition-all enabled:hover:shadow-lg enabled:hover:shadow-purple-500/30 enabled:hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 via-purple-500 to-pink-500 py-3.5 font-semibold text-white transition-all enabled:hover:shadow-lg enabled:hover:shadow-purple-500/30 enabled:hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {isSubmitting ? (
               <Loader2 className="h-5 w-5 animate-spin" />
