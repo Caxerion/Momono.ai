@@ -161,7 +161,7 @@ export default function AdminSidebar(p: Props) {
           }`}
         >
           <ArrowLeft size={15} />
-          {!c && "Back to User"}
+          {!c && "Back to user"}
         </button>
       </div>
 

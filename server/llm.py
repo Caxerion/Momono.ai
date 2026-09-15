@@ -105,6 +105,70 @@ def get_chat_model(key: str, tier: str = "tier1") -> dict:
     return {"key": row["key"], "label": row["label"], "prompt": prompt}
 
 
+REFUSAL_PATTERNS = (
+    "i'm sorry",
+    "i am sorry",
+    "i cannot",
+    "i can't",
+    "cannot fulfill",
+    "can't continue",
+    "cannot continue",
+    "can't assist",
+    "cannot assist",
+    "can't help",
+    "cannot help",
+    "i don't feel comfortable",
+    "as an ai",
+    "as a language model",
+    "i'm not able",
+    "i am not able",
+    "not able to fulfill",
+    "not able to engage",
+    "not able to help",
+    "not permitted",
+    "can't do that",
+    "won't be able",
+    "don't think i can",
+)
+
+
+def _norm(text: str) -> str:
+    return (
+        text.replace("\u2019", "'")
+        .replace("\u2018", "'")
+        .replace("\u201c", '"')
+        .replace("\u201d", '"')
+    )
+
+
+def looks_like_refusal(text: str) -> bool:
+    t = _norm(text).strip().lower()
+    return any(p in t for p in REFUSAL_PATTERNS)
+
+
+async def collect_chat(
+    messages: list[dict], cfg: dict, retries: int = 2
+) -> str:
+    """Stream the full chat completion into a single buffer, retrying on transient errors."""
+    import asyncio
+
+    last_exc: Exception | None = None
+    for attempt in range(retries + 1):
+        try:
+            buf = ""
+            async for piece in stream_chat(messages, cfg):
+                buf += piece
+            return buf
+        except httpx.HTTPStatusError as exc:
+            last_exc = exc
+            retryable = exc.response.status_code in (429, 500, 502, 503, 504)
+            if retryable and attempt < retries:
+                await asyncio.sleep(4 * (attempt + 1))
+                continue
+            raise
+    raise last_exc  # type: ignore[misc]
+
+
 async def stream_chat(
     messages: list[dict], cfg: dict
 ) -> AsyncIterator[str]:

@@ -100,7 +100,7 @@ export default function AdminNavbar({
                 className="w-full flex items-center gap-2 px-3 py-2 text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:outline-none"
               >
                 <ShieldCheck size={14} />
-                Kembali ke User
+                Back to User Page
               </button>
               <button
                 onClick={() => {

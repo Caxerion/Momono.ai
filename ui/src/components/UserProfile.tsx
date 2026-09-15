@@ -409,7 +409,7 @@ export default function UserProfilePage({
                     @{profile.username}
                   </p>
 
-                  {/* Followers / Following / Favorit (sebagai creator) */}
+                  {/* Followers / Following / Favorite (sebagai creator) */}
                   <div className="flex items-center gap-4 mt-2.5">
                     <span className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400">
                       <Users size={15} />
@@ -430,7 +430,7 @@ export default function UserProfilePage({
                       <span className="font-semibold text-zinc-700 dark:text-zinc-200">
                         {favoritCount.toLocaleString()}
                       </span>
-                      Favorit
+                      Favorite
                     </span>
                   </div>
                 </div>
@@ -470,7 +470,7 @@ export default function UserProfilePage({
                         : "border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
                     }`}
                   >
-                    Favorit ({favoritedPersonas.length})
+                    Favorite ({favoritedPersonas.length})
                   </button>
                 </div>
 

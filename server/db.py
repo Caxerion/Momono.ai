@@ -192,13 +192,19 @@ def seed_categories(cur) -> None:
 
 
 def seed_chat_models(cur) -> None:
-    # INSERT OR IGNORE: baris yang sudah diedit admin tidak akan ditimpa
-    # saat restart; key baru dari config tetap masuk.
+    # Sumber utama = config.py. Tiap start, config di-upsert ke DB sehingga
+    # edit konfigurasi otomatis ikut ke panel/chat.
     cur.executemany(
         """
-        INSERT OR IGNORE INTO chat_models
+        INSERT INTO chat_models
             (key, label, description, prompt_tier1, prompt_tier2, sort_order)
         VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(key) DO UPDATE SET
+            label=excluded.label,
+            description=excluded.description,
+            prompt_tier1=excluded.prompt_tier1,
+            prompt_tier2=excluded.prompt_tier2,
+            sort_order=excluded.sort_order
         """,
         [
             (
