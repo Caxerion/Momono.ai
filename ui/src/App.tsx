@@ -254,7 +254,7 @@ export default function App() {
 
   useEffect(() => {
     if (route.path === "admin" && !userProfile?.is_admin) {
-      navigate({ path: "home" });
+      navigate({ path: "discover" });
     }
   }, [route, userProfile, navigate]);
 
@@ -310,7 +310,7 @@ export default function App() {
   }
 
   function handleBackToDefault() {
-    navigate({ path: "home" });
+    navigate({ path: "discover" });
     setConversationId(null);
     setMessages([]);
     setShowCharacterSidebar(false);
@@ -595,7 +595,7 @@ export default function App() {
           userProfile={userProfile}
           onToggleCollapse={() => setAdminCollapsed((x) => !x)}
           onSelectTab={setAdminTab}
-          onBackToUser={() => navigate({ path: "home" })}
+          onBackToUser={() => navigate({ path: "discover" })}
           onLogout={handleLogout}
         />
       ) : (
@@ -629,7 +629,7 @@ export default function App() {
               if (route.path === "edit" && editingPersona) {
                 navigate({ path: "chat", personaId: editingPersona.id });
               } else {
-                navigate({ path: "home" });
+                navigate({ path: "discover" });
               }
             }}
             onSaved={loadPersonas}
@@ -638,7 +638,7 @@ export default function App() {
           <UserProfilePage
             profile={userProfile}
             token={token}
-            onBack={() => navigate({ path: "home" })}
+            onBack={() => navigate({ path: "discover" })}
             onSaved={(updated) => {
               setUserProfile(updated);
               loadProfile();
@@ -659,7 +659,7 @@ export default function App() {
             profile={viewUserProfile}
             token={token}
             editable={Boolean(userProfile && viewUserProfile.username === userProfile.username)}
-            onBack={() => navigate({ path: "home" })}
+            onBack={() => navigate({ path: "discover" })}
             createdPersonas={viewUserPersonas}
             favoritedPersonas={viewUserFavorites}
             onSelectPersona={(pid) => handleSelectPersona(pid)}
@@ -700,14 +700,14 @@ export default function App() {
               userProfile={userProfile}
               collapsed={adminCollapsed}
               onToggleCollapse={() => setAdminCollapsed((x) => !x)}
-              onBack={() => navigate({ path: "home" })}
+              onBack={() => navigate({ path: "discover" })}
               onLogout={handleLogout}
             />
             <Admin
               token={token}
               tab={adminTab}
               onChangeTab={setAdminTab}
-              onBack={() => navigate({ path: "home" })}
+              onBack={() => navigate({ path: "discover" })}
               onViewUser={handleViewUser}
             />
           </div>

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
 export type Route =
-  | { path: "home" }
   | { path: "discover" }
   | { path: "generate" }
   | { path: "chat"; personaId: string }
@@ -27,7 +26,7 @@ function parseHash(): Route {
   if (segs[0] === "create") return { path: "create" };
   if (segs[0] === "settings") return { path: "settings" };
   if (segs[0] === "admin") return { path: "admin" };
-  return { path: "home" };
+  return { path: "discover" };
 }
 
 export function useHashRouter() {
@@ -42,9 +41,8 @@ export function useHashRouter() {
   }, []);
 
   const navigate = useCallback((to: Route) => {
-    let hash = "#/";
+    let hash = "#/discover";
     switch (to.path) {
-      case "home": hash = "#/"; break;
       case "discover": hash = "#/discover"; break;
       case "generate": hash = "#/generate"; break;
       case "chat": hash = `#/chat/${to.personaId}`; break;

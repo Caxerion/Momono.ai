@@ -210,7 +210,7 @@ export default function CharacterProfile({
               {persona.created_by && (
                 <button
                   {...navLink(
-                    persona.user_id ? `#/user/${persona.user_id}` : "#/",
+                    persona.user_id ? `#/user/${persona.user_id}` : "#/discover",
                     () => {
                       if (persona.user_id) onViewUser?.(persona.user_id);
                     }
