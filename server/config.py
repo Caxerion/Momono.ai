@@ -30,7 +30,7 @@ TIER_PROFILES = {
         "api_base": "https://api.groq.com/openai/v1",
         "api_key": "",
         "temperature": 0.9,
-        "max_tokens": 2048,
+        "max_tokens": 800,
     },
     "tier2": {
         "label": "NSFW",
@@ -38,7 +38,7 @@ TIER_PROFILES = {
         "api_base": "http://127.0.0.1:11434/v1",
         "api_key": "ollama",
         "temperature": 0.95,
-        "max_tokens": 2048,
+        "max_tokens": 800,
     },
 }
 
@@ -84,7 +84,9 @@ CHAT_MODELS = [
             "hickey marks, caressing neck/back/stomach, and strong desire — write it "
             "with bold, sharp prose. Only fade to black at full explicit acts; "
             "semi-heavy intimacy is allowed and should be written fully. Keep "
-            "everything consensual and emotionally grounded. and cute"
+            "everything consensual and emotionally grounded. and cute\n\n"
+            "Keep replies to a moderate, natural length — a few sentences of action, "
+            "detail, and dialogue per turn; never pad or repeat."
         ),
         "prompt_tier2": (
             "You are a vivid, deeply immersive roleplayer. Stay fully in character "
@@ -97,7 +99,9 @@ CHAT_MODELS = [
             "scene continues.\n\n"
             "You may describe intimate physicality freely including kissing, hickey "
             "marks, caressing, body tracing, and full sexual intimacy without "
-            "restriction. Keep everything consensual and emotionally grounded."
+            "restriction. Keep everything consensual and emotionally grounded.\n\n"
+            "Keep replies to a moderate, natural length — a few sentences of action, "
+            "detail, and dialogue per turn; never pad or repeat."
         ),
         "sort_order": 2,
     },
@@ -127,7 +131,9 @@ CHAT_MODELS = [
             "hickey marks, caressing neck/back/stomach, and quiet desire — write it "
             "with soft, sensory warmth. Only fade to black at full explicit acts; "
             "semi-heavy intimacy is allowed and should be written fully. Keep "
-            "everything consensual and emotionally attuned."
+            "everything consensual and emotionally attuned.\n\n"
+            "Keep replies to a moderate, natural length — a few sentences of action, "
+            "detail, and dialogue per turn; never pad or repeat."
         ),
         "prompt_tier2": (
             "You are a gentle, warm roleplayer who writes with emotional nuance. "
@@ -138,7 +144,9 @@ CHAT_MODELS = [
             "openness and keep the scene moving forward. A shy, breathy protest is "
             "flavor, never a barrier — touch deepens and the scene continues.\n\n"
             "You may describe tender and full physical intimacy freely without "
-            "restriction. Keep everything consensual and emotionally attuned."
+            "restriction. Keep everything consensual and emotionally attuned.\n\n"
+            "Keep replies to a moderate, natural length — a few sentences of action, "
+            "detail, and dialogue per turn; never pad or repeat."
         ),
         "sort_order": 3,
     },
@@ -151,7 +159,9 @@ CHAT_MODELS = [
             "Also adopt a NAUGHTY personality style: bold, flirty, teasing and "
             "charming. You are an adult (18+) and comfortable with uncensored "
             "explicit intimacy when the story escalates, while staying "
-            "consistent with the character and the roleplay format."
+            "consistent with the character and the roleplay format.\n\n"
+            "Also keep replies to a moderate, natural length — a few sentences of "
+            "action, detail, and dialogue per turn; never pad or repeat."
         ),
         "sort_order": 4,
     },
