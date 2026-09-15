@@ -147,9 +147,13 @@ def looks_like_refusal(text: str) -> bool:
 
 
 async def collect_chat(
-    messages: list[dict], cfg: dict, retries: int = 2
+    messages: list[dict], cfg: dict, retries: int = 3
 ) -> str:
-    """Stream the full chat completion into a single buffer, retrying on transient errors."""
+    """Stream the full chat completion into a single buffer, retrying on transient errors.
+
+    429 (rate limit) diberi backoff jauh lebih panjang karena Groq membatasi
+    request per jendela menit — retry cepat hanya akan gagal terus.
+    """
     import asyncio
 
     last_exc: Exception | None = None
@@ -161,9 +165,19 @@ async def collect_chat(
             return buf
         except httpx.HTTPStatusError as exc:
             last_exc = exc
-            retryable = exc.response.status_code in (429, 500, 502, 503, 504)
+            code = exc.response.status_code
+            retryable = code in (429, 500, 502, 503, 504)
             if retryable and attempt < retries:
-                await asyncio.sleep(4 * (attempt + 1))
+                if code == 429:
+                    backoff = 5 * (attempt + 1) ** 2  # 5, 20, 45 detik
+                    if retry_after := exc.response.headers.get("Retry-After"):
+                        try:
+                            backoff = max(backoff, int(retry_after))
+                        except ValueError:
+                            pass
+                else:
+                    backoff = 2 * (attempt + 1)  # 2, 4, 6 detik
+                await asyncio.sleep(backoff)
                 continue
             raise
     raise last_exc  # type: ignore[misc]

@@ -309,6 +309,12 @@ async def chat(req: Request):
                 final_text = buf
                 break
             refused = looks_like_refusal(final_text)
+        except httpx.HTTPStatusError as exc:
+            logger.warning("stream_chat gagal", exc_info=True)
+            if exc.response.status_code == 429:
+                final_text = "*(Kuota engine lagi habis (429). Tunggu sekitar satu menit lalu kirim lagi ya.)*"
+            else:
+                final_text = "*(Engine gagal merespons — coba lagi sebentar.)*"
         except Exception:
             logger.warning("stream_chat gagal", exc_info=True)
             final_text = "*(Engine gagal merespons — coba lagi sebentar.)*"
