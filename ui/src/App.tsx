@@ -739,12 +739,6 @@ export default function App() {
                   onOpenPersonaProfile={() => navigate({ path: "profile", personaId: currentPersona.id })}
                   onToggleSidebar={() => setShowCharacterSidebar(!showCharacterSidebar)}
                   sidebarOpen={showCharacterSidebar}
-                  tiers={tiers}
-                  chatModels={chatModels}
-                  tier={tier}
-                  chatModel={chatModel}
-                  onTierChange={setTier}
-                  onChatModelChange={setChatModel}
                   dark={dark}
                   onToggleDark={() => setDark(!dark)}
                   onOpenSettings={() => setSettingsOpen(true)}
@@ -791,12 +785,6 @@ export default function App() {
               }
               onToggleSidebar={() => setShowCharacterSidebar(!showCharacterSidebar)}
               sidebarOpen={showCharacterSidebar}
-              tiers={tiers}
-              chatModels={chatModels}
-              tier={tier}
-              chatModel={chatModel}
-              onTierChange={setTier}
-              onChatModelChange={setChatModel}
               dark={dark}
               onToggleDark={() => setDark(!dark)}
               onOpenSettings={() => setSettingsOpen(true)}
