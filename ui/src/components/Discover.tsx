@@ -27,10 +27,10 @@ type Props = {
 };
 
 const ALL = "Semua";
-type Tab = "fyp" | "featured" | "trending";
+type Mode = "all" | "featured" | "trending";
 
-const TABS: { key: Tab; label: string; icon: typeof Compass }[] = [
-  { key: "fyp", label: "For You", icon: Compass },
+const MODES: { key: Mode; label: string; icon: typeof Compass }[] = [
+  { key: "all", label: "All", icon: Compass },
   { key: "featured", label: "Featured", icon: Sparkles },
   { key: "trending", label: "Trending", icon: Flame },
 ];
@@ -38,7 +38,7 @@ const TABS: { key: Tab; label: string; icon: typeof Compass }[] = [
 export default function Discover({ personas, favorites, userProfile, dark, onToggleDark, onOpenProfile, onOpenSettings, onLogout, onChat, onToggleFavorite, onViewUser, conversationCounts }: Props) {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState(ALL);
-  const [tab, setTab] = useState<Tab>("fyp");
+  const [mode, setMode] = useState<Mode>("all");
 
   const categories = useMemo(() => {
     const counts = new Map<string, number>();
@@ -65,10 +65,10 @@ export default function Discover({ personas, favorites, userProfile, dark, onTog
       return matchesCategory && matchesQuery;
     });
 
-    if (tab === "featured") {
+    if (mode === "featured") {
       return base.filter((ps) => ps.featured);
     }
-    if (tab === "trending") {
+    if (mode === "trending") {
       return [...base].sort((a, b) => {
         const scoreA = (a.likes ?? 0) + (a.dislikes ?? 0);
         const scoreB = (b.likes ?? 0) + (b.dislikes ?? 0);
@@ -76,7 +76,7 @@ export default function Discover({ personas, favorites, userProfile, dark, onTog
       });
     }
     return base;
-  }, [personas, search, category, tab]);
+  }, [personas, search, category, mode]);
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-[#FAFAF7] dark:bg-[#0B0D12]">
@@ -109,16 +109,19 @@ export default function Discover({ personas, favorites, userProfile, dark, onTog
           onLogout={onLogout}
         />
 
-        <div className="px-4 pt-3">
-          <div className="flex gap-4 border-b border-[#E7E3D9] dark:border-[#23262F]">
-            {TABS.map(({ key, label, icon: Icon }) => (
+        <div className="px-4 pt-4 flex items-center gap-3 flex-wrap">
+          <h1 className="flex items-center text-xl leading-none font-extrabold tracking-tight text-[#1C1B1A] dark:text-white shrink-0 select-none">
+            For You
+          </h1>
+          <div className="flex gap-2 shrink-0">
+            {MODES.map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
-                onClick={() => setTab(key)}
-                className={`flex items-center gap-1.5 pb-2.5 -mb-px text-sm border-b-2 transition-colors ${
-                  tab === key
-                    ? "border-[#E8611F] text-[#1A1A18] dark:text-[#F0EEE8] font-medium"
-                    : "border-transparent text-[#8A8578] dark:text-[#8B90A0] hover:text-[#1A1A18] dark:hover:text-[#F0EEE8]"
+                onClick={() => setMode(key)}
+                className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium border transition-colors ${
+                  mode === key
+                    ? "bg-[#E8611F] border-[#E8611F] text-white shadow-sm shadow-[#E8611F]/30"
+                    : "bg-white dark:bg-[#161A22] border-[#E7E3D9] dark:border-[#23262F] text-[#8A8578] dark:text-[#8B90A0] hover:border-[#E8611F]/50 hover:text-[#1A1A18] dark:hover:text-[#F0EEE8]"
                 }`}
               >
                 <Icon size={14} />
@@ -153,7 +156,7 @@ export default function Discover({ personas, favorites, userProfile, dark, onTog
               <p className="text-sm text-[#8A8578] dark:text-[#8B90A0]">
                 {search
                   ? `Tidak ada karakter untuk "${search}"`
-                  : tab === "featured"
+                  : mode === "featured"
                   ? "Belum ada karakter unggulan di kategori ini"
                   : "Belum ada karakter di kategori ini"}
               </p>
