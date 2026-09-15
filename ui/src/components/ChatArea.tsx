@@ -77,10 +77,18 @@ const CHAT_COLUMN_CLASS = "max-w-3xl mx-auto w-full";
 
 export default function ChatArea(p: Props) {
   const endRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const [photoPreview, setPhotoPreview] = useState(false);
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [p.messages]);
+
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 160) + "px";
+  }, [p.input]);
 
   const bubbles = buildBubbles(p.messages);
   const lastGroupIdx = bubbles.length - 1;
@@ -286,7 +294,8 @@ export default function ChatArea(p: Props) {
           </button>
 
           <textarea
-            className="flex-1 resize-none rounded-full border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 px-5 py-3 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500 transition-shadow leading-tight"
+            ref={inputRef}
+            className="flex-1 resize-none overflow-y-auto rounded-2xl border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 px-5 py-3 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500 transition-shadow leading-tight"
             rows={1}
             value={p.input}
             placeholder="Type Anything..."
