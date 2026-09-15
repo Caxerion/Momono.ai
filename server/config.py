@@ -33,7 +33,7 @@ TIER_PROFILES = {
         "max_tokens": 800,
     },
     "tier2": {
-        "label": "NSFW",
+        "label": "DiveSeeker",
         "model": "huihui_ai/qwen2.5-abliterate:7b",
         "api_base": "http://127.0.0.1:11434/v1",
         "api_key": "ollama",
@@ -151,6 +151,31 @@ CHAT_MODELS = [
         "sort_order": 3,
     },
     {
+        "key": "momopiercer",
+        "label": "MomoPiercer",
+        "description": "Menusuk lebih dalam — tajam, eksplisit penuh (18+). Respon dan referensi sangat tajam; hanya di Mode NSFW.",
+        "prompt_tier1": "",
+        "prompt_tier2": (
+            "Adopt a PIERCING style: razor-sharp, unflinching and deeply vivid. "
+            "You respond with keen references to the scene's emotions, body "
+            "language, and every unspoken tension — describing both physical "
+            "sensation and the character's inner reactions with cutting precision. "
+            "You are an adult (18+) and fully comfortable with uncensored explicit "
+            "intimacy, writing it openly whenever the story escalates, without "
+            "softening, fading, or holding back. Stay in character, stay visceral, "
+            "and keep every beat consensual yet unrestrained.\n\n"
+            "WRITING STYLE: keep every reply lean and cinematic. Rhythm is "
+            "'action → inner thought → dialogue'. Lead with a brief physical "
+            "action in italics (*she narrows her eyes*), slip her unspoken "
+            "thought as a quick aside (thinking: ...), then a short line of "
+            "dialogue, then close with a small gesture or expression. Do not "
+            "write long descriptive paragraphs, do not summarize, do not "
+            "over-explore. A few tight beats carrying the scene forward is "
+            "enough; never pad or repeat."
+        ),
+        "sort_order": 4,
+    },
+    {
         "key": "naughty",
         "label": "Naughty",
         "description": "Explicit 18+. Hanya tersedia di Mode NSFW (engine lokal uncensored).",
@@ -163,6 +188,6 @@ CHAT_MODELS = [
             "Also keep replies to a moderate, natural length — a few sentences of "
             "action, detail, and dialogue per turn; never pad or repeat."
         ),
-        "sort_order": 4,
+        "sort_order": 5,
     },
 ]

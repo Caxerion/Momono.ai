@@ -41,6 +41,8 @@ type Props = {
   onChatModelChange?: (k: string) => void;
 };
 
+const DIVE_KEYS = new Set(["naughty", "momopiercer"]);
+
 export default function CharacterSidebar({
   persona,
   conversations,
@@ -85,8 +87,39 @@ export default function CharacterSidebar({
   const visibleCategories = showAllCategories ? categories : categories.slice(0, 3);
   const hasMore = categories.length > 3;
 
-  const activeTier = (tiers ?? []).find((t) => t.key === (tier ?? "tier1"));
   const activeChatModel = (chatModels ?? []).find((m) => m.key === (chatModel ?? "standard"));
+  const normalModels = (chatModels ?? []).filter((m) => !DIVE_KEYS.has(m.key));
+  const diveModels = (chatModels ?? []).filter((m) => DIVE_KEYS.has(m.key));
+
+  const renderModelButton = (m: { key: string; label: string; description?: string }) => {
+    const active = (chatModel ?? "standard") === m.key;
+    return (
+      <button
+        key={m.key}
+        type="button"
+        onClick={() => onChatModelChange?.(m.key)}
+        className={`w-full text-left flex items-start gap-2.5 rounded-xl px-3 py-2.5 transition-colors border ${
+          active
+            ? "border-emerald-500/60 bg-emerald-50 dark:bg-emerald-900/20"
+            : "border-transparent bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+        }`}
+      >
+        <span className="flex-1 min-w-0">
+          <span className="block text-sm font-semibold text-zinc-800 dark:text-zinc-100">
+            {m.label}
+          </span>
+          {m.description && (
+            <span className="block text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+              {m.description}
+            </span>
+          )}
+        </span>
+        {active && (
+          <Check size={16} className="text-emerald-500 mt-0.5 shrink-0" />
+        )}
+      </button>
+    );
+  };
 
   // Reset status error setiap ganti persona, biar avatar persona baru
   // dicoba di-load lagi dari awal (bukan ketahan error dari persona sebelumnya).
@@ -363,7 +396,7 @@ export default function CharacterSidebar({
           </div>
 
           {/* Quick Actions */}
-          <div className="p-3 border-b border-zinc-200 dark:border-zinc-800">
+          <div className="p-3">
             <div className="grid grid-cols-3 gap-2">
               <button
                 onClick={onNewChat}
@@ -397,7 +430,6 @@ export default function CharacterSidebar({
               <span>Chat Models</span>
               <span className="ml-auto text-[11px] text-zinc-400 truncate">
                 {activeChatModel?.label ?? "Standard"}
-                {activeTier ? ` · ${activeTier.label}` : ""}
               </span>
               <ChevronDown size={14} className="text-zinc-400 shrink-0" />
             </button>
@@ -518,7 +550,7 @@ export default function CharacterSidebar({
 
             <div className="mt-5">
               <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400">
-                Gaya / Chat Model
+                Chat Models
               </span>
               <div className="mt-1.5 space-y-1.5 max-h-64 overflow-y-auto sidebar-scroll">
                 {(chatModels ?? []).length === 0 && (
@@ -526,35 +558,19 @@ export default function CharacterSidebar({
                     Belum ada chat model.
                   </p>
                 )}
-                {(chatModels ?? []).map((m) => {
-                  const active = (chatModel ?? "standard") === m.key;
-                  return (
-                    <button
-                      key={m.key}
-                      type="button"
-                      onClick={() => onChatModelChange?.(m.key)}
-                      className={`w-full text-left flex items-start gap-2.5 rounded-xl px-3 py-2.5 transition-colors border ${
-                        active
-                          ? "border-emerald-500/60 bg-emerald-50 dark:bg-emerald-900/20"
-                          : "border-transparent bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700"
-                      }`}
-                    >
-                      <span className="flex-1 min-w-0">
-                        <span className="block text-sm font-semibold text-zinc-800 dark:text-zinc-100">
-                          {m.label}
-                        </span>
-                        {m.description && (
-                          <span className="block text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-                            {m.description}
-                          </span>
-                        )}
-                      </span>
-                      {active && (
-                        <Check size={16} className="text-emerald-500 mt-0.5 shrink-0" />
-                      )}
-                    </button>
-                  );
-                })}
+                {(tier ?? "tier1") === "tier2" ? (
+                  diveModels.length > 0 ? (
+                    <div className="space-y-1.5 rounded-xl border border-violet-500/20 dark:border-violet-500/25 bg-violet-500/[0.04] dark:bg-violet-500/[0.06] p-1.5">
+                      {diveModels.map(renderModelButton)}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-zinc-400 py-4 text-center">
+                      Belum ada model DiveSeeker.
+                    </p>
+                  )
+                ) : (
+                  normalModels.map(renderModelButton)
+                )}
               </div>
             </div>
           </div>
