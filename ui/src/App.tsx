@@ -574,6 +574,12 @@ export default function App() {
       personaOrder.set(c.persona_id, i);
     }
   });
+  const conversationCounts = new Map<string, number>();
+  allConversations.forEach((c) => {
+    if (c.persona_id) {
+      conversationCounts.set(c.persona_id, (conversationCounts.get(c.persona_id) ?? 0) + 1);
+    }
+  });
   const sidebarPersonas = Array.from(
     new Map(
       [...allPersonas, ...personas, ...favoritePersonas]
@@ -691,6 +697,7 @@ export default function App() {
             onChat={(pid) => handleSelectPersona(pid)}
             onToggleFavorite={handleToggleFavorite}
             onViewUser={handleViewUser}
+            conversationCounts={conversationCounts}
           />
         ) : route.path === "generate" ? (
           <Generate token={token} />

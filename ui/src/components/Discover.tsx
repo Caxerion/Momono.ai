@@ -23,6 +23,7 @@ type Props = {
   onChat: (id: string) => void;
   onToggleFavorite: (persona: Persona, favorite: boolean) => void;
   onViewUser?: (userId: number | string) => void;
+  conversationCounts: Map<string, number>;
 };
 
 const ALL = "Semua";
@@ -34,7 +35,7 @@ const TABS: { key: Tab; label: string; icon: typeof Compass }[] = [
   { key: "trending", label: "Trending", icon: Flame },
 ];
 
-export default function Discover({ personas, favorites, userProfile, dark, onToggleDark, onOpenProfile, onOpenSettings, onLogout, onChat, onToggleFavorite, onViewUser }: Props) {
+export default function Discover({ personas, favorites, userProfile, dark, onToggleDark, onOpenProfile, onOpenSettings, onLogout, onChat, onToggleFavorite, onViewUser, conversationCounts }: Props) {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState(ALL);
   const [tab, setTab] = useState<Tab>("fyp");
@@ -265,7 +266,7 @@ export default function Discover({ personas, favorites, userProfile, dark, onTog
                       )}
                       <span className="flex items-center gap-1 text-xs text-white/60">
                         <MessageSquare size={11} />
-                        Chat
+                        {(conversationCounts.get(ps.id) ?? 0) > 0 ? conversationCounts.get(ps.id) : "Chat"}
                       </span>
                     </div>
                   </div>
