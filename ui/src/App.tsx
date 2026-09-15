@@ -357,6 +357,18 @@ export default function App() {
     loadAllConversations();
   }
 
+  async function handleRenameConversation(id: string, title: string) {
+    const t = title.trim();
+    if (!t) return;
+    await getJSON(`/api/conversations/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: t }),
+    });
+    loadConversations();
+    loadAllConversations();
+  }
+
   async function ensureConversation(): Promise<string> {
     if (conversationId) return conversationId;
     const pid = route.path === "chat" ? route.personaId : null;
@@ -740,6 +752,7 @@ export default function App() {
               token={token}
               onNewChat={handleNewChat}
               onSelectConversation={handleSelectConversation}
+              onRenameConversation={handleRenameConversation}
               onViewProfile={(p) => navigate({ path: "profile", personaId: p.id })}
               onViewUser={handleViewUser}
               tiers={tiers}

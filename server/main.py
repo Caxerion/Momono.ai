@@ -199,6 +199,28 @@ async def add_message(cid: str, req: Request):
     return {"ok": True}
 
 
+@app.patch("/api/conversations/{cid}")
+async def rename_conversation(cid: str, req: Request):
+    user_id = current_user(req)
+    data = await req.json()
+    title = str(data.get("title") or "").strip()
+    if not title:
+        return {"error": "title required"}
+    with connect() as conn:
+        conv = conn.execute(
+            "SELECT id FROM conversations WHERE id=? AND user_id=?",
+            (cid, user_id),
+        ).fetchone()
+        if not conv:
+            return {"error": "not found"}
+        conn.execute(
+            "UPDATE conversations SET title=? WHERE id=?",
+            (title, cid),
+        )
+        conn.commit()
+    return {"ok": True, "id": cid, "title": title}
+
+
 @app.post("/api/chat")
 async def chat(req: Request):
     data = await req.json()

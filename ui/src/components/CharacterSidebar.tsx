@@ -15,6 +15,9 @@ import {
   ImageIcon,
   Bot,
   X,
+  Pencil,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import type { Conversation, Persona, PersonaReactions } from "../types";
 import { navLink } from "../lib/link";
@@ -27,6 +30,7 @@ type Props = {
   token: string | null;
   onNewChat: () => void;
   onSelectConversation: (id: string) => void;
+  onRenameConversation: (id: string, title: string) => void;
   onViewProfile: (p: Persona) => void;
   onViewUser?: (userId: number | string) => void;
   tiers?: { key: string; label: string }[];
@@ -45,6 +49,7 @@ export default function CharacterSidebar({
   token,
   onNewChat,
   onSelectConversation,
+  onRenameConversation,
   onViewProfile,
   onViewUser,
   tiers,
@@ -64,6 +69,11 @@ export default function CharacterSidebar({
   });
   const [favorite, setFavorite] = useState(persona.favorite ?? false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [histPage, setHistPage] = useState(0);
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+  const HISTORY_PAGE_SIZE = 8;
   // Fallback kalau avatar_url gagal di-load (404, CORS, dsb) — tanpa ini
   // <img> yang gagal cuma nampilin kotak putih kosong yang nutupin banner.
   const [avatarError, setAvatarError] = useState(false);
@@ -167,6 +177,46 @@ export default function CharacterSidebar({
   }
 
   const showAvatarImage = Boolean(persona.avatar_url) && !avatarError;
+
+  const totalHistoryPages = Math.max(1, Math.ceil(conversations.length / HISTORY_PAGE_SIZE));
+  const historyPage = Math.min(histPage, totalHistoryPages - 1);
+  const pageHistory = conversations.slice(
+    historyPage * HISTORY_PAGE_SIZE,
+    historyPage * HISTORY_PAGE_SIZE + HISTORY_PAGE_SIZE
+  );
+
+  function openHistory() {
+    setHistPage(0);
+    setRenamingId(null);
+    setShowHistory(true);
+  }
+
+  function startRename(c: Conversation) {
+    setRenamingId(c.id);
+    setRenameValue(c.title);
+  }
+
+  function cancelRename() {
+    setRenamingId(null);
+    setRenameValue("");
+  }
+
+  function saveRename(id: string) {
+    const t = renameValue.trim();
+    if (t) onRenameConversation(id, t);
+    cancelRename();
+  }
+
+  function fmtDate(iso?: string) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    const now = new Date();
+    if (d.toDateString() === now.toDateString()) {
+      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+    return d.toLocaleDateString();
+  }
 
   return (
     <>
@@ -354,32 +404,16 @@ export default function CharacterSidebar({
           </div>
 
           {/* Chat History */}
-          <div className="flex-1 min-h-0 flex flex-col">
-            <div className="px-4 py-2 flex items-center gap-2 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-              <History size={13} />
-              Chat History
-            </div>
-            <div className="flex-1 min-h-0 overflow-y-auto px-2 pb-2 flex flex-col gap-0.5 sidebar-scroll">
-              {conversations.length === 0 ? (
-                <p className="text-xs text-zinc-400 dark:text-zinc-500 px-2 py-4 text-center">
-                  No conversations yet
-                </p>
-              ) : (
-                conversations.map((c) => (
-                  <button
-                    key={c.id}
-                    onClick={() => onSelectConversation(c.id)}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-sm truncate transition-colors ${
-                      conversationId === c.id
-                        ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-medium"
-                        : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800"
-                    }`}
-                  >
-                    {c.title}
-                  </button>
-                ))
-              )}
-            </div>
+          <div className="px-3 pb-3">
+            <button
+              onClick={openHistory}
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+            >
+              <History size={16} className="text-emerald-500 shrink-0" />
+              <span>Chat History</span>
+              <span className="ml-auto text-[11px] text-zinc-400">{conversations.length}</span>
+              <ChevronDown size={14} className="text-zinc-400 shrink-0" />
+            </button>
           </div>
         </div>
       </div>
@@ -521,6 +555,143 @@ export default function CharacterSidebar({
                     </button>
                   );
                 })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showHistory && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          onClick={() => setShowHistory(false)}
+        >
+          <div
+            className="w-[480px] max-w-[94vw] rounded-2xl bg-white dark:bg-zinc-900 shadow-2xl p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+                  <History size={18} className="text-emerald-500" />
+                  Chat History
+                </h3>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                  {conversations.length} percakapan dengan {persona.name}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowHistory(false)}
+                title="Tutup"
+                className="rounded-lg p-1.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="mt-4 max-h-[50vh] overflow-y-auto sidebar-scroll flex flex-col gap-0.5">
+              {pageHistory.length === 0 ? (
+                <p className="text-sm text-zinc-400 dark:text-zinc-500 py-8 text-center">
+                  Belum ada percakapan — mulai chat dulu.
+                </p>
+              ) : (
+                pageHistory.map((c) =>
+                  renamingId === c.id ? (
+                    <div
+                      key={c.id}
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800"
+                    >
+                      <input
+                        value={renameValue}
+                        onChange={(e) => setRenameValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") saveRename(c.id);
+                          if (e.key === "Escape") cancelRename();
+                        }}
+                        autoFocus
+                        placeholder="Nama baru..."
+                        className="flex-1 min-w-0 bg-transparent text-sm text-zinc-800 dark:text-zinc-100 outline-none placeholder:text-zinc-400"
+                      />
+                      <button
+                        onClick={() => saveRename(c.id)}
+                        title="Simpan"
+                        className="p-1 rounded-lg text-emerald-600 dark:text-emerald-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                      >
+                        <Check size={14} />
+                      </button>
+                      <button
+                        onClick={cancelRename}
+                        title="Batal"
+                        className="p-1 rounded-lg text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div key={c.id} className="group flex items-center gap-1">
+                      <button
+                        onClick={() => onSelectConversation(c.id)}
+                        className={`flex-1 min-w-0 text-left px-3 py-2 rounded-lg transition-colors ${
+                          conversationId === c.id
+                            ? "bg-emerald-100 dark:bg-emerald-900/40"
+                            : "hover:bg-zinc-200 dark:hover:bg-zinc-800"
+                        }`}
+                      >
+                        <span
+                          className={`block text-sm truncate ${
+                            conversationId === c.id
+                              ? "text-emerald-700 dark:text-emerald-300 font-medium"
+                              : "text-zinc-700 dark:text-zinc-300"
+                          }`}
+                        >
+                          {c.title}
+                        </span>
+                        <span className="block text-[11px] text-zinc-400 truncate">
+                          {fmtDate(c.updated_at)}
+                        </span>
+                      </button>
+                      <button
+                        onClick={() => startRename(c)}
+                        title="Rename"
+                        className="p-1.5 rounded-lg text-zinc-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                    </div>
+                  )
+                )
+              )}
+            </div>
+
+            <div className="mt-4 flex items-center justify-between">
+              <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                Halaman {historyPage + 1} dari {totalHistoryPages}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setHistPage(historyPage - 1)}
+                  disabled={historyPage === 0}
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    historyPage === 0
+                      ? "text-zinc-300 dark:text-zinc-600 cursor-not-allowed"
+                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                  }`}
+                >
+                  <ChevronLeft size={14} />
+                  Sebelumnya
+                </button>
+                <button
+                  onClick={() => setHistPage(historyPage + 1)}
+                  disabled={historyPage >= totalHistoryPages - 1}
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    historyPage >= totalHistoryPages - 1
+                      ? "text-zinc-300 dark:text-zinc-600 cursor-not-allowed"
+                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                  }`}
+                >
+                  Berikutnya
+                  <ChevronRight size={14} />
+                </button>
               </div>
             </div>
           </div>
