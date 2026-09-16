@@ -7,9 +7,11 @@ import {
   Heart,
   Share2,
   Check,
+  Flag,
 } from "lucide-react";
 import type { Persona } from "../types";
 import { navLink } from "../lib/link";
+import ReportModal from "./ReportModal";
 
 type Props = {
   persona: Persona;
@@ -91,6 +93,8 @@ export default function CharacterProfile({
   const [dislikes, setDislikes] = useState(0);
   const [myReaction, setMyReaction] = useState<"like" | "dislike" | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reported, setReported] = useState(false);
 
   useEffect(() => {
     try {
@@ -162,6 +166,17 @@ export default function CharacterProfile({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
+  }
+
+  async function submitReport(reason: string) {
+    const h: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) h.Authorization = `Bearer ${token}`;
+    await fetch(`/api/personas/${persona.id}/report`, {
+      method: "POST",
+      headers: h,
+      body: JSON.stringify({ reason }),
+    });
+    setReported(true);
   }
 
   return (
@@ -277,6 +292,14 @@ export default function CharacterProfile({
               {copied ? <Check size={16} className="text-green-500" /> : <Share2 size={16} />}
               {copied ? "Copied" : "Bagikan"}
             </button>
+            <button
+              onClick={() => setReportOpen(true)}
+              disabled={reported}
+              className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-60"
+            >
+              <Flag size={16} />
+              {reported ? "Reported" : "Report"}
+            </button>
           </div>
 
           {/* Tags */}
@@ -323,6 +346,13 @@ export default function CharacterProfile({
           />
         </div>
       )}
+
+      <ReportModal
+        title="Report Character"
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
+        onSubmit={submitReport}
+      />
     </div>
   );
 }

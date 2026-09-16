@@ -14,6 +14,7 @@ import {
   Flag,
 } from "lucide-react";
 import Avatar from "./Avatar";
+import ReportModal from "./ReportModal";
 import type { UserProfile, Persona } from "../types";
 
 type Props = {
@@ -179,9 +180,9 @@ export default function UserProfilePage({
   const [isFollowing, setIsFollowing] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
   const [reported, setReported] = useState(false);
-  const [reporting, setReporting] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(null);
+  const [reportOpen, setReportOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -254,14 +255,14 @@ export default function UserProfilePage({
   }
 
   async function doReport() {
-    if (reporting) return;
-    const reason = window.prompt("Reason for reporting this user (optional):") ?? "";
-    setReporting(true);
-    await sendJSON(`/api/users/${profile.id}/report`, { reason });
-    setReporting(false);
-    setReported(true);
     setMenuOpen(false);
     setMenuPos(null);
+    setReportOpen(true);
+  }
+
+  async function submitReport(reason: string) {
+    await sendJSON(`/api/users/${profile.id}/report`, { reason });
+    setReported(true);
   }
 
   async function uploadAvatar(file: File) {
@@ -623,15 +624,22 @@ export default function UserProfilePage({
             <div className="my-1 border-t border-zinc-200 dark:border-zinc-700" />
             <button
               onClick={doReport}
-              disabled={reporting || reported}
+              disabled={reported}
               className="flex items-center gap-2 w-full text-left px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-60 focus:outline-none"
             >
               <Flag size={14} />
-              {reported ? "Reported" : reporting ? "Reporting..." : "Report"}
+              {reported ? "Reported" : "Report"}
             </button>
           </div>,
           document.body
         )}
+
+      <ReportModal
+        title="Report User"
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
+        onSubmit={submitReport}
+      />
     </div>
   );
 }

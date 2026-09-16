@@ -200,7 +200,8 @@ def admin_reports(req: Request):
     with connect() as conn:
         rows = conn.execute(
             """
-            SELECT reporter_id, reported_id, COALESCE(reason,'') AS reason, created_at
+            SELECT reporter_id, reported_id, COALESCE(reason,'') AS reason, created_at,
+                   COALESCE(target_type,'user') AS target_type
             FROM user_reports ORDER BY created_at DESC
             """
         ).fetchall()
@@ -208,14 +209,25 @@ def admin_reports(req: Request):
     with auth_conn() as auth:
         for row in auth.execute("SELECT id, username FROM users"):
             names[str(row["id"])] = row["username"]
+    persona_names: dict[str, str] = {}
+    with connect() as conn:
+        for row in conn.execute("SELECT id, name FROM personas"):
+            persona_names[row["id"]] = row["name"]
     out = []
     for r in rows:
+        is_char = r["target_type"] == "character"
+        reported_name = (
+            persona_names.get(r["reported_id"], "unknown")
+            if is_char
+            else names.get(r["reported_id"], "unknown")
+        )
         out.append(
             {
                 "reporter_id": r["reporter_id"],
                 "reporter_name": names.get(r["reporter_id"], "unknown"),
                 "reported_id": r["reported_id"],
-                "reported_name": names.get(r["reported_id"], "unknown"),
+                "reported_name": reported_name,
+                "target_type": r["target_type"],
                 "reason": r["reason"],
                 "created_at": r["created_at"],
             }

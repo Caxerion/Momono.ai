@@ -26,6 +26,7 @@ type Props = {
   onChangeTab: (tab: Tab) => void;
   onBack: () => void;
   onViewUser: (userId: string) => void;
+  onViewPersona?: (personaId: string) => void;
 };
 
 type Stats = {
@@ -67,6 +68,7 @@ type AdminReport = {
   reporter_name: string;
   reported_id: string;
   reported_name: string;
+  target_type?: string;
   reason: string;
   created_at: string;
 };
@@ -122,7 +124,7 @@ function fmtDate(iso?: string): string {
   return d.toLocaleString();
 }
 
-export default function Admin({ token, tab, onChangeTab, onBack, onViewUser }: Props) {
+export default function Admin({ token, tab, onChangeTab, onBack, onViewUser, onViewPersona }: Props) {
   const setTab = onChangeTab;
   const [stats, setStats] = useState<Stats | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -271,7 +273,7 @@ export default function Admin({ token, tab, onChangeTab, onBack, onViewUser }: P
         ) : tab === "personas" ? (
           <PersonasTable personas={personas} busyId={busyId} onDelete={deletePersona} onViewUser={onViewUser} />
         ) : tab === "reports" ? (
-          <ReportsTable reports={reports} busyId={busyId} onResolve={resolveReport} onViewUser={onViewUser} />
+          <ReportsTable reports={reports} busyId={busyId} onResolve={resolveReport} onViewUser={onViewUser} onViewPersona={onViewPersona} />
         ) : tab === "chat-models" ? (
           <ChatModelsEditor models={chatModels} token={token} onSaved={load} />
         ) : (
@@ -669,23 +671,34 @@ function ReportsTable({
   busyId,
   onResolve,
   onViewUser,
+  onViewPersona,
 }: {
   reports: AdminReport[];
   busyId: string | null;
   onResolve: (r: string, d: string) => void;
   onViewUser: (id: string) => void;
+  onViewPersona?: (id: string) => void;
 }) {
   return (
-    <Table headers={["Pelapor", "Yang dilaporkan", "Alasan", "Waktu", ""]}>
+    <Table headers={["Tipe", "Pelapor", "Yang dilaporkan", "Alasan", "Waktu", ""]}>
       {reports.length === 0 && (
         <tr>
-          <td colSpan={5} className="px-3 py-8 text-center text-zinc-400">
+          <td colSpan={6} className="px-3 py-8 text-center text-zinc-400">
             Tidak ada laporan. Mantap!
           </td>
         </tr>
       )}
-      {reports.map((r) => (
-        <tr key={`${r.reporter_id}-${r.reported_id}`} className="hover:bg-zinc-50 dark:hover:bg-zinc-900">
+      {reports.map((r) => {
+        const isChar = r.target_type === "character";
+        return (
+        <tr key={`${r.reporter_id}-${r.reported_id}-${r.target_type ?? "user"}`} className="hover:bg-zinc-50 dark:hover:bg-zinc-900">
+          <td className="px-3 py-2">
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+              isChar ? "bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300"
+            }`}>
+              {isChar ? "Character" : "User"}
+            </span>
+          </td>
           <td className="px-3 py-2">
             <button
               {...navLink(`#/user/${r.reporter_id}`, () => onViewUser(r.reporter_id))}
@@ -695,12 +708,21 @@ function ReportsTable({
             </button>
           </td>
           <td className="px-3 py-2">
-            <button
-              {...navLink(`#/user/${r.reported_id}`, () => onViewUser(r.reported_id))}
-              className="font-medium text-zinc-900 dark:text-zinc-100 hover:underline"
-            >
-              @{r.reported_name}
-            </button>
+            {isChar && onViewPersona ? (
+              <button
+                {...navLink(`#/profile/${r.reported_id}`, () => onViewPersona(r.reported_id))}
+                className="font-medium text-zinc-900 dark:text-zinc-100 hover:underline"
+              >
+                {r.reported_name}
+              </button>
+            ) : (
+              <button
+                {...navLink(`#/user/${r.reported_id}`, () => onViewUser(r.reported_id))}
+                className="font-medium text-zinc-900 dark:text-zinc-100 hover:underline"
+              >
+                @{r.reported_name}
+              </button>
+            )}
           </td>
           <td className="px-3 py-2 text-zinc-500 max-w-[300px] truncate">{r.reason || "-"}</td>
           <td className="px-3 py-2 text-zinc-500 whitespace-nowrap">{fmtDate(r.created_at)}</td>
@@ -712,7 +734,8 @@ function ReportsTable({
             />
           </td>
         </tr>
-      ))}
+        );
+      })}
     </Table>
   );
 }

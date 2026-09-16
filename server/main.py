@@ -718,8 +718,27 @@ async def report_user(uid: str, req: Request):
     ts = now()
     with connect() as conn:
         conn.execute(
-            "INSERT OR REPLACE INTO user_reports (reporter_id, reported_id, reason, created_at) VALUES (?,?,?,?)",
+            """INSERT OR REPLACE INTO user_reports
+            (reporter_id, reported_id, reason, created_at, target_type)
+            VALUES (?,?,?,?, 'user')""",
             (me, uid, reason, ts),
+        )
+        conn.commit()
+    return {"ok": True}
+
+
+@app.post("/api/personas/{pid}/report")
+async def report_persona(pid: str, req: Request):
+    data = await req.json()
+    me = current_user(req)
+    reason = data.get("reason", "")
+    ts = now()
+    with connect() as conn:
+        conn.execute(
+            """INSERT OR REPLACE INTO user_reports
+            (reporter_id, reported_id, reason, created_at, target_type)
+            VALUES (?,?,?,?, 'character')""",
+            (me, pid, reason, ts),
         )
         conn.commit()
     return {"ok": True}

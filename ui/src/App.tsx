@@ -66,7 +66,9 @@ export default function App() {
     { key: string; label: string; description?: string }[]
   >([]);
   const [tier, setTier] = useState("tier1");
-  const [chatModel, setChatModel] = useState("standard");
+  const [chatModel, setChatModel] = useState(
+    () => localStorage.getItem("chatModel") ?? "standard"
+  );
 
   const selectingRef = useRef<string | null>(null);
   const triedRef = useRef<string | null>(null);
@@ -79,6 +81,10 @@ export default function App() {
       window.history.replaceState({}, "", window.location.pathname);
     }
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem("chatModel", chatModel);
+  }, [chatModel]);
 
   useEffect(() => {
     getJSON("/api/models").then((d) => {
@@ -340,7 +346,7 @@ export default function App() {
     setConversationId(null);
     setShowCharacterSidebar(false);
     setRegenView({});
-    const persona = personas.find((p) => p.id === (route.path === "chat" ? route.personaId : null));
+    const persona = findPersona(route.path === "chat" ? route.personaId : "");
     if (persona?.greeting) {
       setMessages([{ role: "assistant", content: resolveUserVars(persona.greeting, userProfile) }]);
     } else {
@@ -716,6 +722,7 @@ export default function App() {
               onChangeTab={setAdminTab}
               onBack={() => navigate({ path: "discover" })}
               onViewUser={handleViewUser}
+              onViewPersona={(id) => navigate({ path: "profile", personaId: id })}
             />
           </div>
         ) : route.path === "chat" && currentPersona ? (

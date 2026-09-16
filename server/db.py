@@ -143,10 +143,16 @@ def init_db() -> None:
                 reported_id TEXT NOT NULL,
                 reason TEXT,
                 created_at TEXT NOT NULL,
-                PRIMARY KEY (reporter_id, reported_id)
+                target_type TEXT NOT NULL DEFAULT 'user',
+                PRIMARY KEY (reporter_id, reported_id, target_type)
             )
             """
         )
+        # Migrasi: tambah kolom target_type ke tabel lama
+        try:
+            cur.execute("ALTER TABLE user_reports ADD COLUMN target_type TEXT NOT NULL DEFAULT 'user'")
+        except sqlite3.OperationalError:
+            pass
         cur.execute(
             """
             CREATE TABLE IF NOT EXISTS chat_models (
