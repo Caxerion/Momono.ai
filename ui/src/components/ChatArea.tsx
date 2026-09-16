@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, PanelRightClose, PanelRightOpen, Plus, Send, Sparkles } from "lucide-react";
+import { ArrowLeft, Menu, Plus, Send, Sparkles } from "lucide-react";
 import AppNavbar from "./AppNavbar";
 import Avatar from "./Avatar";
 import type { Message, Persona, UserProfile } from "../types";
@@ -143,6 +143,7 @@ export default function ChatArea(p: Props) {
               </span>
             )
           }
+          right={null}
           userProfile={p.userProfile ?? null}
           dark={p.dark}
           onToggleDark={p.onToggleDark}
@@ -150,6 +151,20 @@ export default function ChatArea(p: Props) {
           onOpenSettings={p.onOpenSettings}
           onLogout={p.onLogout}
         />
+
+        {p.persona && (
+          <button
+            onClick={p.onToggleSidebar}
+            title={p.sidebarOpen ? "Sembunyikan panel karakter" : "Buka panel karakter"}
+            className={`absolute top-[68px] right-3 z-20 flex items-center justify-center w-9 h-9 rounded-full shadow-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
+              p.sidebarOpen
+                ? "text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40"
+                : "text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-800 hover:text-zinc-800 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-700"
+            }`}
+          >
+            <Menu size={18} strokeWidth={2} />
+          </button>
+        )}
 
         <div className={`${CHAT_COLUMN_CLASS} p-4 space-y-4`}>
           {p.messages.length === 0 && (
@@ -330,20 +345,6 @@ export default function ChatArea(p: Props) {
             className="w-64 h-64 rounded-full object-cover shadow-2xl"
           />
         </div>
-      )}
-
-      {p.persona && (
-        <button
-          onClick={p.onToggleSidebar}
-          title={p.sidebarOpen ? "Sembunyikan panel karakter" : "Buka panel karakter"}
-          className={`absolute right-2.5 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-8 h-8 rounded-full shadow-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
-            p.sidebarOpen
-              ? "bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-900/30"
-              : "bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-700"
-          }`}
-        >
-          {p.sidebarOpen ? <PanelRightClose size={16} /> : <PanelRightOpen size={16} />}
-        </button>
       )}
     </main>
   );
