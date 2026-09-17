@@ -111,6 +111,7 @@ export default function Discover({ personas, favorites, userProfile, dark, onTog
           onLogout={onLogout}
         />
 
+        <div className="w-full max-w-7xl mx-auto">
         <div className="px-4 pt-4 flex items-center gap-3 flex-wrap">
           <h1 className="flex items-center text-xl leading-none font-extrabold tracking-tight text-[#1C1B1A] dark:text-white shrink-0 select-none">
             For You
@@ -281,6 +282,7 @@ export default function Discover({ personas, favorites, userProfile, dark, onTog
           </div>
         )}
       </div>
+    </div>
     </div>
     </div>
   );
