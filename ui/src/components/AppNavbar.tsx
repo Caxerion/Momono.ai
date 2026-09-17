@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Bell, Globe, LogOut, Menu, Moon, Settings, Sun, User } from "lucide-react";
+import { Bell, Globe, LogOut, Menu, Moon, MoreVertical, Settings, Sun, User } from "lucide-react";
 import Avatar from "./Avatar";
 import type { UserProfile } from "../types";
 
@@ -8,6 +8,8 @@ type Props = {
   center?: ReactNode;
   right?: ReactNode;
   wideCenter?: boolean;
+  compactMobile?: boolean;
+  compactTitle?: ReactNode;
   onOpenMenu?: () => void;
   userProfile: UserProfile | null;
   dark: boolean;
@@ -28,6 +30,8 @@ export default function AppNavbar({
   center,
   right,
   wideCenter = false,
+  compactMobile = false,
+  compactTitle,
   onOpenMenu,
   userProfile,
   dark,
@@ -89,7 +93,7 @@ export default function AppNavbar({
           }`}
         >
           <div className="flex items-center min-w-0">
-            {onOpenMenu && (
+            {onOpenMenu && !compactMobile && (
               <button
                 onClick={onOpenMenu}
                 title="Menu"
@@ -100,6 +104,11 @@ export default function AppNavbar({
               </button>
             )}
             {left}
+            {compactMobile && (
+              <div className="flex items-center gap-2 min-w-0 ml-1">
+                <div className="flex items-center gap-2 min-w-0">{compactTitle}</div>
+              </div>
+            )}
           </div>
           <div
             className={`w-full hidden md:block ${
@@ -108,38 +117,56 @@ export default function AppNavbar({
           >
             {center}
           </div>
-          <div className="flex items-center justify-end gap-0.5">
+          <div className="flex items-center justify-end gap-0.5 w-full col-start-3" ref={menuRef}>
             {right}
-            <button className={ICON_BTN} title="Language">
+            <button className={`${ICON_BTN} ${compactMobile ? "hidden md:flex" : ""}`} title="Language">
               <Globe size={18} strokeWidth={2} />
             </button>
-            <button className={ICON_BTN} title="Notifications">
+            <button className={`${ICON_BTN} ${compactMobile ? "hidden md:flex" : ""}`} title="Notifications">
               <Bell size={18} strokeWidth={2} />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-zinc-950" />
             </button>
             <button
-              className={ICON_BTN}
+              className={`${ICON_BTN} ${compactMobile ? "hidden md:flex" : ""}`}
               title={dark ? "Switch to light mode" : "Switch to dark mode"}
               onClick={onToggleDark}
             >
               {dark ? <Sun size={18} /> : <Moon size={18} />}
             </button>
 
-            <div className="relative ml-1.5" ref={menuRef}>
+            <div className="relative">
+              {compactMobile && (
+                <button
+                  onClick={() => setMenuOpen((v) => !v)}
+                  title="Menu profil"
+                  aria-haspopup="menu"
+                  aria-expanded={menuOpen}
+                  className="relative flex items-center justify-center w-9 h-9 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 md:hidden"
+                >
+                  <MoreVertical size={20} />
+                </button>
+              )}
               <button
                 onClick={() => setMenuOpen((v) => !v)}
                 title="Menu"
                 aria-haspopup="menu"
                 aria-expanded={menuOpen}
-                className="shrink-0 rounded-full transition-all hover:ring-2 hover:ring-emerald-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+                className={`shrink-0 rounded-full transition-all hover:ring-2 hover:ring-emerald-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
+                  compactMobile ? "hidden md:block" : ""
+                }`}
               >
                 <Avatar name={username || "?"} size={34} src={userProfile?.avatar_url} />
               </button>
+              {compactMobile && <span className="md:hidden" />}
 
               {menuOpen && (
                 <div
                   role="menu"
-                  className="absolute right-0 top-[calc(100%+8px)] w-60 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-lg shadow-zinc-900/10 dark:shadow-black/40 z-50 overflow-hidden"
+                  className={`${
+                    compactMobile
+                      ? "fixed right-3 top-14 w-72 md:absolute md:right-0 md:top-[calc(100%+8px)] md:w-60"
+                      : "absolute right-0 top-[calc(100%+8px)] w-60"
+                  } rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-lg shadow-zinc-900/10 dark:shadow-black/40 z-50 overflow-hidden`}
                 >
                   <div className="px-3 py-2.5 border-b border-zinc-100 dark:border-zinc-800">
                     <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">
@@ -212,7 +239,7 @@ export default function AppNavbar({
             </div>
           </div>
         </div>
-        {center && <div className="md:hidden px-3 pb-2.5">{center}</div>}
+        {center && !compactMobile && <div className="md:hidden px-3 pb-2.5">{center}</div>}
       </header>
     </>
   );

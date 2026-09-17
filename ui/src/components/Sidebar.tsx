@@ -180,7 +180,7 @@ export default function Sidebar(p: Props) {
 
   return (
     <aside
-      className={`shrink-0 border-r border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 flex flex-col h-screen fixed inset-y-0 left-0 z-50 w-72 transition-transform duration-200 ease-in-out ${
+      className={`shrink-0 border-r border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 flex flex-col h-screen fixed inset-y-0 left-0 z-50 w-64 transition-transform duration-200 ease-in-out ${
         p.mobileOpen ? "translate-x-0" : "-translate-x-full"
       } lg:relative lg:translate-x-0 lg:z-auto lg:transition-[width] lg:duration-200 lg:ease-in-out ${
         collapsed ? "lg:w-16" : "lg:w-72"

@@ -104,6 +104,29 @@ export default function ChatArea(p: Props) {
       <div className="flex-1 overflow-y-auto">
         <AppNavbar
           onOpenMenu={p.onOpenMenu}
+          compactMobile
+          compactTitle={
+            p.persona ? (
+              <>
+                <div className="relative shrink-0">
+                  <Avatar name={p.persona.name} size={28} src={p.persona.avatar_url} />
+                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-zinc-950" />
+                </div>
+                <div className="min-w-0 text-left leading-tight">
+                  <span className="block font-bold text-sm text-zinc-900 dark:text-zinc-100 truncate">
+                    {p.persona.name}
+                  </span>
+                  {p.persona.created_by && (
+                    <span className="block text-xs text-zinc-500 dark:text-zinc-400 truncate">
+                      @{p.persona.created_by}
+                    </span>
+                  )}
+                </div>
+              </>
+            ) : (
+              "Momono.ai"
+            )
+          }
           left={
             p.persona ? (
               <button
@@ -124,28 +147,28 @@ export default function ChatArea(p: Props) {
               </div>
             )
           }
-          center={
+          center={p.persona ? null : (
+            <span className="font-semibold text-sm text-zinc-500 dark:text-zinc-400 truncate">
+              Mulai chat dengan karakter
+            </span>
+          )}
+          right={
             p.persona ? (
               <button
-                {...navLink(`#/profile/${p.persona.id}`, p.onOpenPersonaProfile)}
-                title="Lihat profil karakter"
-                className="flex items-center gap-2 max-w-full"
+                onClick={p.onToggleSidebar}
+                title={p.sidebarOpen ? "Sembunyikan panel karakter" : "Buka panel karakter"}
+                aria-label="Toggle panel karakter"
+                aria-pressed={p.sidebarOpen}
+                className={`md:hidden relative flex items-center justify-center w-9 h-9 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
+                  p.sidebarOpen
+                    ? "text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40"
+                    : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                }`}
               >
-                <div className="relative shrink-0">
-                  <Avatar name={p.persona.name} size={28} src={p.persona.avatar_url} />
-                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-zinc-950" />
-                </div>
-                <span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 truncate max-w-[180px] hover:underline underline-offset-4">
-                  {p.persona.name}
-                </span>
+                <Menu size={18} strokeWidth={2} />
               </button>
-            ) : (
-              <span className="font-semibold text-sm text-zinc-500 dark:text-zinc-400 truncate">
-                Mulai chat dengan karakter
-              </span>
-            )
+            ) : null
           }
-          right={null}
           userProfile={p.userProfile ?? null}
           dark={p.dark}
           onToggleDark={p.onToggleDark}
@@ -158,7 +181,7 @@ export default function ChatArea(p: Props) {
           <button
             onClick={p.onToggleSidebar}
             title={p.sidebarOpen ? "Sembunyikan panel karakter" : "Buka panel karakter"}
-            className={`absolute top-24 md:top-[68px] right-3 z-20 flex items-center justify-center w-9 h-9 rounded-full shadow-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
+            className={`hidden md:flex absolute md:top-[68px] right-3 z-20 flex items-center justify-center w-9 h-9 rounded-full shadow-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
               p.sidebarOpen
                 ? "text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40"
                 : "text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-800 hover:text-zinc-800 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-700"
