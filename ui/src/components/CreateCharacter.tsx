@@ -251,7 +251,7 @@ export default function CreateCharacter({ persona, token, createdBy, onBack, onS
         />
         <p className="text-xs text-zinc-400 mb-6">{personality.length}/10000 characters</p>
 
-        <div className="flex justify-between items-center pb-6">
+        <div className="flex flex-wrap justify-between items-center gap-3 pb-6">
           {persona ? (
             <button
               className="px-4 py-2 rounded-lg text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 border border-red-200 dark:border-red-800"

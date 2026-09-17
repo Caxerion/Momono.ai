@@ -197,9 +197,9 @@ export default function CharacterProfile({
 
       {/* Content — kolom di tengah, tapi teks di dalam tetap rata kiri */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-2xl mx-auto px-8 py-8">
+        <div className="max-w-2xl mx-auto px-4 sm:px-8 py-8">
           {/* Avatar kotak + nama + created by, sejajar horizontal */}
-          <div className="flex items-start gap-5">
+          <div className="flex flex-col sm:flex-row items-start gap-5">
             <button
               onClick={() => persona.avatar_url && setPhotoPreview(true)}
               className="shrink-0"
@@ -266,7 +266,7 @@ export default function CharacterProfile({
           </div>
 
           {/* Actions: Chat, Favorit, Bagikan — Edit Character sudah ada di samping nama */}
-          <div className="flex items-center gap-3 mt-5">
+          <div className="flex flex-wrap items-center gap-3 mt-5">
             <button
               {...navLink(`#/chat/${persona.id}`, () => onChat(persona.id))}
               className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 transition-colors text-white rounded-xl px-5 py-2.5 text-sm font-semibold"

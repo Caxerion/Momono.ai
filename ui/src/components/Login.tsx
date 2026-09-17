@@ -59,10 +59,10 @@ export default function Login({ onLogin }: Props) {
   }
 
   return (
-    <div className="flex h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-900">
+    <div className="flex h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-900 p-4">
       <form
         onSubmit={handleSubmit}
-        className="w-80 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6 shadow-lg"
+        className="w-full max-w-sm rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6 shadow-lg"
       >
         <h1 className="text-xl font-bold text-center mb-1">Momono</h1>
         <p className="text-xs text-zinc-500 text-center mb-6">

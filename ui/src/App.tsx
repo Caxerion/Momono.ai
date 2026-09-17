@@ -61,6 +61,8 @@ export default function App() {
   const [showWelcome, setShowWelcome] = useState(false);
   const [adminTab, setAdminTab] = useState<AdminTab>("dashboard");
   const [adminCollapsed, setAdminCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [adminMobileOpen, setAdminMobileOpen] = useState(false);
   const [tiers, setTiers] = useState<{ key: string; label: string }[]>([]);
   const [chatModels, setChatModels] = useState<
     { key: string; label: string; description?: string }[]
@@ -85,6 +87,14 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem("chatModel", chatModel);
   }, [chatModel]);
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setAdminMobileOpen(false);
+    if (window.matchMedia("(max-width: 1023px)").matches) {
+      setShowCharacterSidebar(false);
+    }
+  }, [route]);
 
   useEffect(() => {
     getJSON("/api/models").then((d) => {
@@ -609,6 +619,8 @@ export default function App() {
           onSelectTab={setAdminTab}
           onBackToUser={() => navigate({ path: "discover" })}
           onLogout={handleLogout}
+          mobileOpen={adminMobileOpen}
+          onCloseMobile={() => setAdminMobileOpen(false)}
         />
       ) : (
         <Sidebar
@@ -628,9 +640,13 @@ export default function App() {
         onOpenProfile={() => navigate({ path: "me" })}
         onOpenSettings={() => setSettingsOpen(true)}
         onLogout={handleLogout}
+        mobileOpen={mobileMenuOpen}
       />
       )}
-      <div className="flex-1 flex flex-col relative min-h-0">
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-40 bg-black/50 lg:hidden" onClick={() => setMobileMenuOpen(false)} aria-hidden="true" />
+      )}
+      <div className="flex-1 flex flex-col relative min-w-0 min-h-0">
         {route.path === "create" || route.path === "edit" ? (
           <CreateCharacter
             persona={route.path === "edit" ? editingPersona : null}
@@ -703,6 +719,7 @@ export default function App() {
             onChat={(pid) => handleSelectPersona(pid)}
             onToggleFavorite={handleToggleFavorite}
             onViewUser={handleViewUser}
+            onOpenMenu={() => setMobileMenuOpen((o) => !o)}
             conversationCounts={conversationCounts}
           />
         ) : route.path === "generate" ? (
@@ -711,8 +728,7 @@ export default function App() {
           <div className="flex-1 flex flex-col min-h-0">
             <AdminNavbar
               userProfile={userProfile}
-              collapsed={adminCollapsed}
-              onToggleCollapse={() => setAdminCollapsed((x) => !x)}
+              onOpenMobile={() => setAdminMobileOpen((o) => !o)}
               onBack={() => navigate({ path: "discover" })}
               onLogout={handleLogout}
             />
@@ -741,6 +757,7 @@ export default function App() {
                   busy={busy}
                   userProfile={userProfile}
                   onViewUser={handleViewUser}
+onOpenMenu={() => setMobileMenuOpen((o) => !o)}
                   onBack={handleBackToDefault}
                   onOpenProfile={() => navigate({ path: "me" })}
                   onOpenPersonaProfile={() => navigate({ path: "profile", personaId: currentPersona.id })}
@@ -769,6 +786,7 @@ export default function App() {
               chatModel={chatModel}
               onTierChange={setTier}
               onChatModelChange={setChatModel}
+              onClose={() => setShowCharacterSidebar(false)}
             />
           </div>
         ) : (

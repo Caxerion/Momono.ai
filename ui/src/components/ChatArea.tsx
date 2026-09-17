@@ -60,6 +60,7 @@ type Props = {
   userProfile?: UserProfile | null;
   onViewUser?: (userId: number | string) => void;
   onBack: () => void;
+  onOpenMenu?: () => void;
   onOpenProfile: () => void;
   onOpenPersonaProfile: () => void;
   onToggleSidebar: () => void;
@@ -102,6 +103,7 @@ export default function ChatArea(p: Props) {
     <main className="relative flex-1 flex flex-col bg-white dark:bg-zinc-950 min-h-0">
       <div className="flex-1 overflow-y-auto">
         <AppNavbar
+          onOpenMenu={p.onOpenMenu}
           left={
             p.persona ? (
               <button
@@ -156,7 +158,7 @@ export default function ChatArea(p: Props) {
           <button
             onClick={p.onToggleSidebar}
             title={p.sidebarOpen ? "Sembunyikan panel karakter" : "Buka panel karakter"}
-            className={`absolute top-[68px] right-3 z-20 flex items-center justify-center w-9 h-9 rounded-full shadow-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
+            className={`absolute top-24 md:top-[68px] right-3 z-20 flex items-center justify-center w-9 h-9 rounded-full shadow-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
               p.sidebarOpen
                 ? "text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40"
                 : "text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-800 hover:text-zinc-800 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-700"
@@ -209,7 +211,7 @@ export default function ChatArea(p: Props) {
               return (
                 <div key={`u-${bi}`} className="flex gap-3 flex-row-reverse">
                   <Avatar name="You" emoji="🙂" size={36} />
-                  <div className="max-w-[70%] rounded-2xl px-4 py-2 whitespace-pre-wrap bg-emerald-600 text-white">
+                  <div className="max-w-[85%] sm:max-w-[70%] rounded-2xl px-4 py-2 whitespace-pre-wrap bg-emerald-600 text-white">
                     {renderText(b.msg.content)}
                   </div>
                 </div>
@@ -220,7 +222,7 @@ export default function ChatArea(p: Props) {
               return (
                 <div key={`a-${bi}`} className="flex gap-3">
                   <Avatar name={p.persona?.name ?? "AI"} size={36} src={p.persona?.avatar_url} />
-                  <div className="max-w-[70%] rounded-2xl px-4 py-2 whitespace-pre-wrap bg-zinc-100 dark:bg-zinc-800">
+                  <div className="max-w-[85%] sm:max-w-[70%] rounded-2xl px-4 py-2 whitespace-pre-wrap bg-zinc-100 dark:bg-zinc-800">
                     {renderText(b.msg.content)}
                   </div>
                 </div>
@@ -238,13 +240,13 @@ export default function ChatArea(p: Props) {
               <div key={`g-${bi}`}>
                 <div className="flex gap-3 flex-row-reverse mb-3">
                   <Avatar name="You" emoji="🙂" size={36} />
-                  <div className="max-w-[70%] rounded-2xl px-4 py-2 whitespace-pre-wrap bg-emerald-600 text-white">
+                  <div className="max-w-[85%] sm:max-w-[70%] rounded-2xl px-4 py-2 whitespace-pre-wrap bg-emerald-600 text-white">
                     {renderText(b.userMsg.content)}
                   </div>
                 </div>
                 <div className="flex gap-3">
                   <Avatar name={p.persona?.name ?? "AI"} size={36} src={p.persona?.avatar_url} />
-                  <div className="max-w-[70%] rounded-2xl px-4 py-2 whitespace-pre-wrap bg-zinc-100 dark:bg-zinc-800">
+                  <div className="max-w-[85%] sm:max-w-[70%] rounded-2xl px-4 py-2 whitespace-pre-wrap bg-zinc-100 dark:bg-zinc-800">
                     {current.content ? (
                       renderText(current.content)
                     ) : p.busy && isLast ? (

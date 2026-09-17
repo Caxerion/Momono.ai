@@ -23,6 +23,7 @@ type Props = {
   onChat: (id: string) => void;
   onToggleFavorite: (persona: Persona, favorite: boolean) => void;
   onViewUser?: (userId: number | string) => void;
+  onOpenMenu?: () => void;
   conversationCounts: Map<string, number>;
 };
 
@@ -35,7 +36,7 @@ const MODES: { key: Mode; label: string; icon: typeof Compass }[] = [
   { key: "trending", label: "Trending", icon: Flame },
 ];
 
-export default function Discover({ personas, favorites, userProfile, dark, onToggleDark, onOpenProfile, onOpenSettings, onLogout, onChat, onToggleFavorite, onViewUser, conversationCounts }: Props) {
+export default function Discover({ personas, favorites, userProfile, dark, onToggleDark, onOpenProfile, onOpenSettings, onLogout, onChat, onToggleFavorite, onViewUser, onOpenMenu, conversationCounts }: Props) {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState(ALL);
   const [mode, setMode] = useState<Mode>("all");
@@ -82,6 +83,7 @@ export default function Discover({ personas, favorites, userProfile, dark, onTog
     <div className="flex-1 flex flex-col min-h-0 bg-[#FAFAF7] dark:bg-[#0B0D12]">
       <div className="flex-1 overflow-y-auto">
         <AppNavbar
+          onOpenMenu={onOpenMenu}
           left={
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-[#1C1B1A] dark:bg-white flex items-center justify-center shrink-0">
@@ -113,7 +115,7 @@ export default function Discover({ personas, favorites, userProfile, dark, onTog
           <h1 className="flex items-center text-xl leading-none font-extrabold tracking-tight text-[#1C1B1A] dark:text-white shrink-0 select-none">
             For You
           </h1>
-          <div className="flex gap-2 shrink-0">
+          <div className="flex gap-2 flex-wrap min-w-0">
             {MODES.map(({ key, label, icon: Icon }) => (
               <button
                 key={key}

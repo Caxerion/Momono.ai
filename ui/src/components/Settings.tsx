@@ -163,7 +163,7 @@ export default function Settings({ profile, token, onBack, onSaved }: Props) {
           placeholder="Male, Female, or other..."
         />
 
-        <div className="flex items-center gap-3 pb-6">
+        <div className="flex flex-wrap items-center gap-3 pb-6">
           <button
             className="px-5 py-2.5 rounded-lg text-sm font-medium bg-zinc-200 dark:bg-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-600"
             onClick={onBack}

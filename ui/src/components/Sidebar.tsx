@@ -39,6 +39,7 @@ type Props = {
   onOpenProfile: () => void;
   onOpenSettings: () => void;
   onLogout: () => void;
+  mobileOpen?: boolean;
 };
 
 export default function Sidebar(p: Props) {
@@ -162,7 +163,7 @@ export default function Sidebar(p: Props) {
                 } else {
                   const rect = e.currentTarget.getBoundingClientRect();
                   setMenuOpen(ps.id);
-                  setMenuPos({ top: rect.bottom + 4, left: rect.right - 176 });
+                  setMenuPos({ top: rect.bottom + 4, left: Math.min(rect.right - 176, window.innerWidth - 184) });
                 }
               }}
               className={`p-1.5 rounded-md text-zinc-400 hover:bg-zinc-300/70 dark:hover:bg-zinc-700 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
@@ -179,15 +180,17 @@ export default function Sidebar(p: Props) {
 
   return (
     <aside
-      className={`shrink-0 border-r border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 flex flex-col h-screen relative transition-[width] duration-200 ease-in-out ${
-        collapsed ? "w-16" : "w-72"
+      className={`shrink-0 border-r border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 flex flex-col h-screen fixed inset-y-0 left-0 z-50 w-72 transition-transform duration-200 ease-in-out ${
+        p.mobileOpen ? "translate-x-0" : "-translate-x-full"
+      } lg:relative lg:translate-x-0 lg:z-auto lg:transition-[width] lg:duration-200 lg:ease-in-out ${
+        collapsed ? "lg:w-16" : "lg:w-72"
       }`}
     >
-      {/* Collapse toggle */}
+      {/* Collapse toggle (desktop only) */}
       <button
         onClick={() => setCollapsed(!collapsed)}
         title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        className="absolute -right-3 top-6 z-30 w-6 h-6 rounded-full border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 shadow-sm flex items-center justify-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+        className="hidden lg:flex absolute -right-3 top-6 z-30 w-6 h-6 rounded-full border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 shadow-sm items-center justify-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
       >
         {collapsed ? <PanelLeftOpen size={13} /> : <PanelLeftClose size={13} />}
       </button>

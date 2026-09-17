@@ -360,7 +360,7 @@ export default function UserProfilePage({
         <div className="max-w-2xl mx-auto w-full p-6 sm:p-8">
           {!editing ? (
             <>
-              <div className="flex items-start gap-5">
+              <div className="flex flex-col sm:flex-row items-start gap-5">
                 <Avatar name={profile.username} src={profile.avatar_url} size={112} />
                 <div className="min-w-0 flex-1 pt-1">
                   <div className="flex items-center gap-2">
@@ -411,7 +411,7 @@ export default function UserProfilePage({
                   </p>
 
                   {/* Followers / Following / Favorite (sebagai creator) */}
-                  <div className="flex items-center gap-4 mt-2.5">
+                  <div className="flex flex-wrap items-center gap-4 mt-2.5">
                     <span className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400">
                       <Users size={15} />
                       <span className="font-semibold text-zinc-700 dark:text-zinc-200">

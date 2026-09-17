@@ -39,6 +39,7 @@ type Props = {
   chatModel?: string;
   onTierChange?: (t: string) => void;
   onChatModelChange?: (k: string) => void;
+  onClose?: () => void;
 };
 
 const DIVE_KEYS = new Set(["naughty", "momopiercer"]);
@@ -60,6 +61,7 @@ export default function CharacterSidebar({
   chatModel,
   onTierChange,
   onChatModelChange,
+  onClose,
 }: Props) {
   const [copied, setCopied] = useState(false);
   const [showAllCategories, setShowAllCategories] = useState(false);
@@ -253,11 +255,19 @@ export default function CharacterSidebar({
 
   return (
     <>
+      {visible && onClose && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+      )}
       <div
-        className={`w-72 flex-shrink-0 border-l border-zinc-200 dark:border-zinc-800 transition-all duration-300 ease-in-out overflow-hidden ${
+        className={`w-72 flex-shrink-0 border-l border-zinc-200 dark:border-zinc-800 fixed inset-y-0 right-0 z-50 transition-all duration-300 ease-in-out overflow-hidden ${
           visible ? "opacity-100" : "opacity-0 pointer-events-none"
+        } ${visible ? "translate-x-0" : "translate-x-full"} lg:static lg:translate-x-0 ${
+          visible ? "lg:ml-0" : "lg:-ml-72"
         }`}
-        style={{ marginLeft: visible ? 0 : -288 }}
       >
         <div className="w-72 h-full flex flex-col min-h-0 bg-zinc-50 dark:bg-zinc-900">
           {/* Banner header — foto profil ditampilkan penuh sebagai banner, bukan avatar bulat */}

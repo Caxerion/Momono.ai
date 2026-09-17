@@ -5,16 +5,14 @@ import type { UserProfile } from "../types";
 
 type Props = {
   userProfile: UserProfile | null;
-  collapsed: boolean;
-  onToggleCollapse: () => void;
+  onOpenMobile: () => void;
   onBack: () => void;
   onLogout: () => void;
 };
 
 export default function AdminNavbar({
   userProfile,
-  collapsed,
-  onToggleCollapse,
+  onOpenMobile,
   onBack,
   onLogout,
 }: Props) {
@@ -34,8 +32,8 @@ export default function AdminNavbar({
       <div className="flex items-center gap-3 px-3 h-14">
         {/* Mobile sidebar toggle (lg:hidden) */}
         <button
-          onClick={onToggleCollapse}
-          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          onClick={onOpenMobile}
+          title="Open sidebar"
           className="lg:hidden rounded-lg p-2 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:outline-none"
         >
           <Menu size={18} />

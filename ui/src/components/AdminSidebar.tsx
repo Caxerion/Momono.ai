@@ -31,6 +31,8 @@ type Props = {
   onSelectTab: (tab: AdminTab) => void;
   onBackToUser: () => void;
   onLogout: () => void;
+  mobileOpen?: boolean;
+  onCloseMobile?: () => void;
 };
 
 const SECTIONS: { label: string; items: { key: AdminTab; label: string; icon: ReactNode }[] }[] = [
@@ -60,19 +62,29 @@ const SECTIONS: { label: string; items: { key: AdminTab; label: string; icon: Re
 export default function AdminSidebar(p: Props) {
   const c = p.collapsed;
   return (
-    <aside
-      className={`shrink-0 border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex flex-col h-screen relative transition-[width] duration-200 ease-in-out ${
-        c ? "w-16" : "w-64"
-      }`}
-    >
-      {/* Collapse toggle */}
-      <button
-        onClick={p.onToggleCollapse}
-        title={c ? "Expand" : "Collapse"}
-        className="absolute -right-3 top-6 z-30 w-6 h-6 rounded-full border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 shadow-sm flex items-center justify-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+    <>
+      {p.mobileOpen && p.onCloseMobile && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={p.onCloseMobile}
+          aria-hidden="true"
+        />
+      )}
+      <aside
+        className={`shrink-0 border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex flex-col h-screen lg:h-auto w-64 fixed inset-y-0 left-0 z-50 transition-transform duration-200 ease-in-out ${
+          p.mobileOpen ? "translate-x-0" : "-translate-x-full"
+        } lg:relative lg:translate-x-0 lg:z-auto lg:transition-[width] lg:duration-200 lg:ease-in-out ${
+          c ? "lg:w-16" : "lg:w-64"
+        }`}
       >
-        {c ? <PanelLeftOpen size={13} /> : <PanelLeftClose size={13} />}
-      </button>
+        {/* Collapse toggle (desktop only) */}
+        <button
+          onClick={p.onToggleCollapse}
+          title={c ? "Expand" : "Collapse"}
+          className="hidden lg:flex absolute -right-3 top-6 z-30 w-6 h-6 rounded-full border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 shadow-sm items-center justify-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+        >
+          {c ? <PanelLeftOpen size={13} /> : <PanelLeftClose size={13} />}
+        </button>
 
       {/* Brand */}
       <div className={`pt-4 pb-3 flex items-center gap-2 ${c ? "justify-center" : "px-4"}`}>
@@ -193,5 +205,6 @@ export default function AdminSidebar(p: Props) {
         </div>
       )}
     </aside>
+    </>
   );
 }

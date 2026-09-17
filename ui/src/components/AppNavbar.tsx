@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Bell, Globe, LogOut, Moon, Settings, Sun, User } from "lucide-react";
+import { Bell, Globe, LogOut, Menu, Moon, Settings, Sun, User } from "lucide-react";
 import Avatar from "./Avatar";
 import type { UserProfile } from "../types";
 
@@ -8,6 +8,7 @@ type Props = {
   center?: ReactNode;
   right?: ReactNode;
   wideCenter?: boolean;
+  onOpenMenu?: () => void;
   userProfile: UserProfile | null;
   dark: boolean;
   onToggleDark: () => void;
@@ -27,6 +28,7 @@ export default function AppNavbar({
   center,
   right,
   wideCenter = false,
+  onOpenMenu,
   userProfile,
   dark,
   onToggleDark,
@@ -86,7 +88,19 @@ export default function AppNavbar({
             wideCenter ? "grid-cols-[1fr_minmax(0,2fr)_1fr]" : "grid-cols-[1fr_auto_1fr]"
           }`}
         >
-          <div className="flex items-center min-w-0">{left}</div>
+          <div className="flex items-center min-w-0">
+            {onOpenMenu && (
+              <button
+                onClick={onOpenMenu}
+                title="Menu"
+                aria-label="Open menu"
+                className="lg:hidden mr-1 -ml-1 rounded-lg p-2 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-800 dark:hover:text-zinc-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+              >
+                <Menu size={20} />
+              </button>
+            )}
+            {left}
+          </div>
           <div
             className={`w-full hidden md:block ${
               wideCenter ? "max-w-2xl justify-self-center" : "max-w-md"
