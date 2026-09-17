@@ -29,6 +29,10 @@
   scrollbar-color: #3f3f46 transparent;
 }
 
+#err {
+  display: none !important;
+}
+
 .dark *::-webkit-scrollbar-thumb {
   background-color: #3f3f46;
 }
