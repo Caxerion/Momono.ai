@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Menu, Plus, Send, Sparkles } from "lucide-react";
+import { ArrowLeft, Menu, Plus, Send, Sparkles, User } from "lucide-react";
 import AppNavbar from "./AppNavbar";
 import Avatar from "./Avatar";
 import type { Message, Persona, UserProfile } from "../types";
@@ -13,6 +13,17 @@ function renderText(text: string) {
     .replace(/>/g, "&gt;");
   const html = escaped.replace(/\*([^*]+)\*/g, '<em class="italic opacity-80">$1</em>');
   return <span dangerouslySetInnerHTML={{ __html: html }} />;
+}
+
+function UserAvatar({ name, src }: { name: string; src?: string | null }) {
+  if (src) {
+    return <Avatar name={name} size={36} src={src} />;
+  }
+  return (
+    <div className="rounded-full flex items-center justify-center bg-zinc-200 dark:bg-zinc-700 text-zinc-500 dark:text-zinc-300 shrink-0" style={{ width: 36, height: 36 }}>
+      <User size={18} strokeWidth={2} />
+    </div>
+  );
 }
 
 type Bubble =
@@ -233,7 +244,7 @@ export default function ChatArea(p: Props) {
             if (b.type === "user") {
               return (
                 <div key={`u-${bi}`} className="flex gap-3 flex-row-reverse">
-                  <Avatar name="You" emoji="🙂" size={36} />
+                  <UserAvatar name="You" src={p.userProfile?.avatar_url} />
                   <div className="max-w-[85%] sm:max-w-[70%] rounded-2xl px-4 py-2 whitespace-pre-wrap bg-emerald-600 text-white">
                     {renderText(b.msg.content)}
                   </div>
@@ -262,7 +273,7 @@ export default function ChatArea(p: Props) {
             return (
               <div key={`g-${bi}`}>
                 <div className="flex gap-3 flex-row-reverse mb-3">
-                  <Avatar name="You" emoji="🙂" size={36} />
+                  <UserAvatar name="You" src={p.userProfile?.avatar_url} />
                   <div className="max-w-[85%] sm:max-w-[70%] rounded-2xl px-4 py-2 whitespace-pre-wrap bg-emerald-600 text-white">
                     {renderText(b.userMsg.content)}
                   </div>

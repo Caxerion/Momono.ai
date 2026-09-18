@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Check, ChevronDown, ArrowLeft } from "lucide-react";
 import Avatar from "./Avatar";
 import type { Category, Persona } from "../types";
 
@@ -9,6 +10,11 @@ type Props = {
   onBack: () => void;
   onSaved: () => void;
 };
+
+const FIELD =
+  "w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 px-3.5 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500 transition-shadow";
+const LABEL =
+  "block text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5";
 
 export default function CreateCharacter({ persona, token, createdBy, onBack, onSaved }: Props) {
   const [name, setName] = useState(persona?.name ?? "");
@@ -23,7 +29,25 @@ export default function CreateCharacter({ persona, token, createdBy, onBack, onS
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     persona?.categories ? persona.categories.split(",").map((c) => c.trim()).filter(Boolean) : []
   );
+  const [catOpen, setCatOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const catRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!catOpen) return;
+    function onDown(e: MouseEvent) {
+      if (catRef.current && !catRef.current.contains(e.target as Node)) setCatOpen(false);
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setCatOpen(false);
+    }
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [catOpen]);
 
   useEffect(() => {
     fetch("/api/categories", {
@@ -117,14 +141,16 @@ export default function CreateCharacter({ persona, token, createdBy, onBack, onS
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-zinc-950">
-      <div className="flex items-center gap-3 p-3 border-b border-zinc-200 dark:border-zinc-800">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-200 dark:border-zinc-800">
         <button
           onClick={onBack}
-          className="rounded-lg px-2 py-1 text-sm hover:bg-zinc-200 dark:hover:bg-zinc-800"
+          title="Back"
+          aria-label="Back"
+          className="flex items-center justify-center -ml-1 p-2 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
         >
-          ← Back
+          <ArrowLeft size={18} />
         </button>
-        <span className="font-semibold text-sm">
+        <span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">
           {persona ? "Edit Character" : "Create New Character"}
         </span>
       </div>
@@ -174,63 +200,94 @@ export default function CreateCharacter({ persona, token, createdBy, onBack, onS
           <p className="text-xs text-zinc-400 mt-2">Click to upload photo</p>
         </div>
 
-        <label className="block text-sm font-medium mb-1">Name</label>
+        <label className={LABEL}>Name</label>
         <input
-          className="w-full mb-4 rounded-lg border border-zinc-200 dark:border-zinc-700 p-2.5 bg-zinc-100 dark:bg-zinc-800"
+          className={`${FIELD} mb-4`}
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Character name..."
         />
 
-        <label className="block text-sm font-medium mb-1">Title (short description)</label>
+        <label className={LABEL}>Title (short description)</label>
         <input
-          className="w-full mb-4 rounded-lg border border-zinc-200 dark:border-zinc-700 p-2.5 bg-zinc-100 dark:bg-zinc-800"
+          className={`${FIELD} mb-4`}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="e.g. A shy girl who loves reading novels"
         />
 
-        <label className="block text-sm font-medium mb-1">Categories</label>
-        <div className="mb-4">
-          <div className="flex flex-wrap gap-2">
-            {categories.map((cat) => {
-              const active = selectedCategories.includes(cat.name);
-              return (
-                <button
-                  key={cat.name}
-                  type="button"
-                  onClick={() => toggleCategory(cat.name)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                    active
-                      ? "bg-emerald-600 text-white border-emerald-600"
-                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700 hover:border-emerald-400"
-                  }`}
-                >
-                  {cat.name}
-                </button>
-              );
-            })}
-          </div>
-          {selectedCategories.length === 0 && (
-            <p className="text-xs text-zinc-400 mt-1.5">Select one or more categories</p>
+        <label className={LABEL}>Categories</label>
+        <div className="mb-4 relative" ref={catRef}>
+          <button
+            type="button"
+            onClick={() => setCatOpen((v) => !v)}
+            className={`${FIELD} flex items-center justify-between gap-2 text-left`}
+          >
+            {selectedCategories.length === 0 ? (
+              <span className="text-zinc-400">Select categories...</span>
+            ) : (
+              <span className="flex flex-wrap gap-1.5 min-w-0">
+                {selectedCategories.map((c) => (
+                  <span
+                    key={c}
+                    className="inline-flex items-center rounded-full bg-emerald-600 text-white px-2 py-0.5 text-xs font-medium"
+                  >
+                    {c}
+                  </span>
+                ))}
+              </span>
+            )}
+            <ChevronDown
+              size={16}
+              className={`shrink-0 text-zinc-400 transition-transform ${catOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+          {catOpen && (
+            <div className="absolute z-30 mt-1 w-full max-h-56 overflow-y-auto rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 shadow-lg py-1">
+              {categories.length === 0 && (
+                <p className="px-3 py-2 text-sm text-zinc-400">No categories available</p>
+              )}
+              {categories.map((cat) => {
+                const active = selectedCategories.includes(cat.name);
+                return (
+                  <button
+                    key={cat.name}
+                    type="button"
+                    onClick={() => toggleCategory(cat.name)}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-left text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700/70 focus:outline-none focus-visible:bg-zinc-100 dark:focus-visible:bg-zinc-700/70 transition-colors"
+                  >
+                    <span
+                      className={`w-4 h-4 shrink-0 rounded border flex items-center justify-center ${
+                        active
+                          ? "bg-emerald-600 border-emerald-600 text-white"
+                          : "border-zinc-300 dark:border-zinc-600"
+                      }`}
+                    >
+                      {active && <Check size={12} strokeWidth={3} />}
+                    </span>
+                    {cat.name}
+                  </button>
+                );
+              })}
+            </div>
           )}
         </div>
 
-        <label className="block text-sm font-medium mb-1">About (character description)</label>
+        <label className={LABEL}>About (character description)</label>
         <p className="text-xs text-zinc-400 mb-2">
-          Bisa juga pakai <code className="text-emerald-500 dark:text-emerald-400">{"{user}"}</code> untuk merujuk nama pemain.
+          You can also use <code className="text-emerald-500 dark:text-emerald-400">{"{user}"}</code> to refer the user's display name.
         </p>
         <textarea
-          className="w-full mb-4 rounded-lg border border-zinc-200 dark:border-zinc-700 p-2.5 bg-zinc-100 dark:bg-zinc-800 resize-y"
+          className={`${FIELD} mb-4 resize-y`}
           rows={4}
           value={about}
           onChange={(e) => setAbout(e.target.value)}
           placeholder="e.g. A shy high school girl who is caring. Loves reading novels. When embarrassed, her cheeks turn red and she speaks softly."
         />
 
-        <label className="block text-sm font-medium mb-1">Greeting (opening message, optional)</label>
+        <label className={LABEL}>Greeting (opening message, optional)</label>
         <textarea
-          className="w-full mb-2 rounded-lg border border-zinc-200 dark:border-zinc-700 p-2.5 bg-zinc-100 dark:bg-zinc-800 resize-y"
+          className={`${FIELD} mb-2 resize-y`}
           rows={3}
           value={greeting}
           onChange={(e) => setGreeting(e.target.value)}
@@ -240,9 +297,9 @@ export default function CreateCharacter({ persona, token, createdBy, onBack, onS
           Pakai <code className="text-emerald-500 dark:text-emerald-400">{"{user}"}</code> untuk manggil nama pemain, contoh: "Hi {"{user}"}"
         </p>
 
-        <label className="block text-sm font-medium mb-1">Character's Personality</label>
+        <label className={LABEL}>Character's Personality</label>
         <textarea
-          className="w-full mb-2 rounded-lg border border-zinc-200 dark:border-zinc-700 p-2.5 bg-zinc-100 dark:bg-zinc-800 resize-y"
+          className={`${FIELD} mb-2 resize-y`}
           rows={10}
           maxLength={10000}
           value={personality}
@@ -254,7 +311,7 @@ export default function CreateCharacter({ persona, token, createdBy, onBack, onS
         <div className="flex flex-wrap justify-between items-center gap-3 pb-6">
           {persona ? (
             <button
-              className="px-4 py-2 rounded-lg text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 border border-red-200 dark:border-red-800"
+              className="px-4 py-2 rounded-xl text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 border border-red-200 dark:border-red-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
               onClick={remove}
             >
               Delete Character
@@ -264,13 +321,13 @@ export default function CreateCharacter({ persona, token, createdBy, onBack, onS
           )}
           <div className="flex gap-2">
             <button
-              className="px-4 py-2 rounded-lg text-sm bg-zinc-200 dark:bg-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-600"
+              className="px-4 py-2 rounded-xl text-sm font-medium bg-zinc-200 dark:bg-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-600 text-zinc-700 dark:text-zinc-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
               onClick={onBack}
             >
               Cancel
             </button>
             <button
-              className="px-5 py-2 rounded-lg text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
+              className="px-5 py-2 rounded-xl text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
               disabled={busy || !name}
               onClick={save}
             >
